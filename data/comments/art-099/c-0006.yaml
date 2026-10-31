@@ -1,0 +1,21 @@
+id: c-0006
+article_ids: [art-099, art-098]
+draft_id: null
+kind: speech
+claim_type: interpretation
+stance: support
+source_type: primary
+speaker:
+  name: "新藤義孝"
+  role: "衆議院議員"
+  party: "自由民主党・無所属の会"
+date: 2026-07-16
+venue: "衆議院憲法審査会"
+excerpt: "どうしても国会が開けないという究極の緊急事態に備えまして、国家としての統治機能を維持するため、内閣が一時的に法律や予算に代わる緊急政令を制定し緊急財政処分を行える制度を万々が一の備えとして用意しておくことが必要ではと提案をしております。"
+summary: "自由民主党の新藤義孝衆議院議員(憲法審査会)が、選挙実施困難な事態の認定基準についての議論状況を説明した上で、国会を開けない究極の緊急事態に備え、内閣が法律・予算に代わる緊急政令・緊急財政処分を行える制度を「万々が一の備え」として用意する必要性を提案した。"
+summary_source: ai
+source_url: "https://kokkai.ndl.go.jp/txt/122104183X01320260716/2"
+archive_url: ""
+accessed_at: 2026-11-01
+tags: ["緊急事態条項", "緊急政令"]
+verified: true
