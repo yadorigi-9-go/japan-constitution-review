@@ -1,0 +1,15 @@
+id: art-003
+title: "国旗及び国歌の規定を新設(現行第3条「内閣の助言と承認」は第6条に統合)"
+is_new: true
+renamed_from: null
+chapter: 第一章
+number: 3
+paragraphs:
+  - no: 1
+    based_on: null
+    text: "国旗は日章旗とし、国歌は君が代とする。"
+  - no: 2
+    based_on: null
+    text: "日本国民は、国旗及び国歌を尊重しなければならない。"
+source_url: "https://storage.jimin.jp/pdf/news/policy/130250_1.pdf"
+retrieved_at: 2026-11-01

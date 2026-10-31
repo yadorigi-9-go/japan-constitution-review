@@ -1,0 +1,15 @@
+id: art-007
+title: "摂政の規定を整理(現行第5条から改番)"
+is_new: false
+renamed_from: art-005
+chapter: 第一章
+number: 7
+paragraphs:
+  - no: 1
+    based_on: 1
+    text: "皇室典範の定めるところにより摂政を置くときは、摂政は、天皇の名で、その国事に関する行為を行う。"
+  - no: 2
+    based_on: null
+    text: "第五条及び前条第四項の規定は、摂政について準用する。"
+source_url: "https://storage.jimin.jp/pdf/news/policy/130250_1.pdf"
+retrieved_at: 2026-11-01

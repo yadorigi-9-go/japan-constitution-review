@@ -1,0 +1,12 @@
+id: art-004
+title: "元号の規定を新設(現行第4条「天皇の権能」は第5条に移動)"
+is_new: true
+renamed_from: null
+chapter: 第一章
+number: 4
+paragraphs:
+  - no: 1
+    based_on: null
+    text: "元号は、法律の定めるところにより、皇位の継承があったときに制定する。"
+source_url: "https://storage.jimin.jp/pdf/news/policy/130250_1.pdf"
+retrieved_at: 2026-11-01
