@@ -1,0 +1,14 @@
+name: Check links
+
+on:
+  schedule:
+    # 毎週月曜 03:00 UTC (正午頃 JST) に実行する。
+    - cron: '0 3 * * 1'
+  workflow_dispatch: {}
+
+jobs:
+  check-links:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 scripts/check_links.py

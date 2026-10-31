@@ -1,0 +1,46 @@
+name: Build and deploy
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# 同時に走った場合、最新のデプロイだけを残す。
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  # YAML のスキーマ検証 (Zod) はビルド時に Astro が行うため、
+  # ビルドが通ること自体がスキーマ検証を兼ねる (docs/design.md 10)。
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  # main への push 時のみ GitHub Pages に公開する (pull_request では公開しない)。
+  deploy:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
