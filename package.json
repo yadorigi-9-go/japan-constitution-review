@@ -11,7 +11,8 @@
     "build": "astro build && pagefind --site dist",
     "preview": "astro preview",
     "astro": "astro",
-    "fetch:articles": "python3 scripts/fetch_articles.py"
+    "fetch:articles": "python3 scripts/fetch_articles.py",
+    "check:links": "python3 scripts/check_links.py"
   },
   "dependencies": {
     "@astrojs/sitemap": "^3.7.4",
