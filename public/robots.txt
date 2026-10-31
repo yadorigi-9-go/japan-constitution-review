@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://yadorigi-9-go.github.io/japan-constitution-review/sitemap-index.xml

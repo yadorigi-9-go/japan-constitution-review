@@ -1,5 +1,5 @@
 ---
-import { getCollection } from 'astro:content';
+import { getCollection, type CollectionEntry } from 'astro:content';
 import BaseLayout from '../../../layouts/BaseLayout.astro';
 import { articleLabel, computeDraftArticleDiff } from '../../../lib/draftDiff';
 
@@ -17,12 +17,20 @@ export async function getStaticPaths() {
   });
 }
 
+interface Props {
+  draft: CollectionEntry<'drafts'>;
+  entry: CollectionEntry<'draftArticles'>;
+}
+
 const { draft, entry } = Astro.props;
 const row = await computeDraftArticleDiff(entry);
 const base = import.meta.env.BASE_URL;
 ---
 
-<BaseLayout title={`${row.title} | ${draft.data.name} | 日本国憲法レビュー`}>
+<BaseLayout
+	title={`${row.title} | ${draft.data.name} | 日本国憲法レビュー`}
+	description={`${draft.data.name}による${row.title}の変更内容(現行憲法との差分)。`}
+>
 	<p class="font-mono mb-4 text-sm">
 		<a href={`${base}drafts/${draft.id}`}>&larr; {draft.data.name}</a>
 	</p>

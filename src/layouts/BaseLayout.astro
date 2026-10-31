@@ -3,11 +3,15 @@ import '../styles/global.css';
 
 interface Props {
 	title: string;
+	description?: string;
 }
 
-const { title } = Astro.props;
+const defaultDescription =
+	'日本国憲法と改憲案の論点・リスクを、コードレビュー形式で検証する非公式サイト。';
+const { title, description = defaultDescription } = Astro.props;
 const base = import.meta.env.BASE_URL;
 const path = Astro.url.pathname;
+const canonicalURL = new URL(path, Astro.site);
 const isActive = (segment: string) => path === `${base}${segment}` || path.startsWith(`${base}${segment}/`);
 const tabs = [
 	{ href: base, label: '条文', icon: '📄', active: path === base || path.startsWith(`${base}articles/`) },
@@ -25,6 +29,16 @@ const tabs = [
 		<meta name="viewport" content="width=device-width" />
 		<meta name="generator" content={Astro.generator} />
 		<title>{title}</title>
+		<meta name="description" content={description} />
+		<link rel="canonical" href={canonicalURL} />
+		<meta property="og:type" content="website" />
+		<meta property="og:site_name" content="日本国憲法レビュー" />
+		<meta property="og:title" content={title} />
+		<meta property="og:description" content={description} />
+		<meta property="og:url" content={canonicalURL} />
+		<meta name="twitter:card" content="summary" />
+		<meta name="twitter:title" content={title} />
+		<meta name="twitter:description" content={description} />
 		<slot name="head" />
 		<script is:inline>
 			// ちらつき防止のため、スタイル適用前に同期的にテーマを決定する。

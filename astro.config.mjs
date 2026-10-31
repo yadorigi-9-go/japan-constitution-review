@@ -2,11 +2,14 @@
 import { defineConfig } from 'astro/config';
 
 import tailwindcss from '@tailwindcss/vite';
+import sitemap from '@astrojs/sitemap';
 
 // https://astro.build/config
 export default defineConfig({
   site: 'https://yadorigi-9-go.github.io',
   base: '/japan-constitution-review/',
+
+  integrations: [sitemap()],
 
   vite: {
     plugins: [tailwindcss()],
