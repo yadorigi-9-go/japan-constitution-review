@@ -1,0 +1,18 @@
+id: art-072
+title: "内閣総理大臣に「総合調整」権限と国防軍統括権(最高指揮官)を新設"
+is_new: false
+renamed_from: null
+chapter: 第五章
+number: 72
+paragraphs:
+  - no: 1
+    based_on: 1
+    text: "内閣総理大臣は、行政各部を指揮監督し、その総合調整を行う。"
+  - no: 2
+    based_on: 1
+    text: "内閣総理大臣は、内閣を代表して、議案を国会に提出し、並びに一般国務及び外交関係について国会に報告する。"
+  - no: 3
+    based_on: null
+    text: "内閣総理大臣は、最高指揮官として、国防軍を統括する。"
+source_url: "https://storage.jimin.jp/pdf/news/policy/130250_1.pdf"
+retrieved_at: 2026-11-01
