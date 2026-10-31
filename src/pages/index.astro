@@ -1,7 +1,16 @@
 ---
 import { getCollection } from 'astro:content';
 
-const articles = (await getCollection('articles')).sort((a, b) => a.id.localeCompare(b.id));
+// 前文を先頭に、条文は条文番号(数値)の昇順で並べる。
+const articles = (await getCollection('articles')).sort((a, b) => {
+  if (a.data.kind !== b.data.kind) {
+    return a.data.kind === 'preamble' ? -1 : 1;
+  }
+  if (a.data.kind === 'article' && b.data.kind === 'article') {
+    return a.data.number - b.data.number;
+  }
+  return 0;
+});
 ---
 
 <html lang="ja">
@@ -20,7 +29,7 @@ const articles = (await getCollection('articles')).sort((a, b) => a.id.localeCom
 			{articles.map((article) => (
 				<li>
 					<a href={`${import.meta.env.BASE_URL}articles/${article.id}`}>
-						第{article.data.number}条
+						{article.data.kind === 'preamble' ? '前文' : `第${article.data.number}条`}
 					</a>
 				</li>
 			))}

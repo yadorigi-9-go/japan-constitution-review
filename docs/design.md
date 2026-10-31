@@ -4,7 +4,7 @@
 現時点の設計案であり、実装を進める中で更新します。
 
 - 最終更新: 2026-10-31
-- ステータス: 設計案(スキーマは未確定)
+- ステータス: 設計案(`data/articles/` のスキーマは確定、`data/drafts/` は未確定)
 
 ---
 
@@ -107,6 +107,7 @@ flowchart LR
 ### 5.1 条文 `data/articles/art-009.yaml`
 
 ```yaml
+kind: article   # article | preamble
 id: art-009
 chapter: 第二章
 number: 9
@@ -118,6 +119,20 @@ retrieved_at: 2026-10-31
 ```
 
 `id` はファイル名(拡張子を除いた部分)と完全一致させる。条文番号は3桁にゼロ埋めする(`art-009`)。文字列として並べ替えたときに数値順と一致させるため。
+
+前文(`data/articles/preamble.yaml`)は章・条文番号を持たないため、`kind: preamble` として `chapter` / `number` を省いた別形式で扱う。`paragraphs[].no` は e-Gov の構造化データ上の段落区切りを表示用に流用したものであり、前文自体に公式な段落番号は存在しない(画面上もその旨を明記する)。
+
+```yaml
+kind: preamble
+id: preamble
+paragraphs:
+  - no: 1
+    text: "(前文第1段落)"
+source_url: "(e-Gov の該当ページ)"
+retrieved_at: 2026-10-31
+```
+
+現行憲法の第十一章「補則」(第100条〜第103条)は、別立ての「附則」ではなく通常の条文スキーマ(`kind: article`)にそのまま収まる。
 
 ### 5.2 改憲案 `data/drafts/<draft-id>/`
 
@@ -269,7 +284,7 @@ GitHub Actions で次を自動化する。
 
 ## 13. 未決事項
 
-- スキーマの詳細(枝番条文、前文・附則の扱い)
+- 改憲案(`data/drafts/`)側の枝番条文・附則のスキーマ詳細(現行条文の前文・補則の扱いは5.1で確定済み)
 - 取り上げる改憲案の範囲と、各案の出典の確定
 - 独自ドメインの取得をするか
 - 会議録APIの利用規約の確認結果

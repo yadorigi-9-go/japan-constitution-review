@@ -24,19 +24,36 @@ const articles = defineCollection({
       return actual;
     },
   }),
-  schema: z.object({
-    id: z.string(),
-    chapter: z.string(),
-    number: z.number(),
-    paragraphs: z.array(
-      z.object({
-        no: z.number(),
-        text: z.string(),
-      }),
-    ),
-    source_url: z.string().url(),
-    retrieved_at: z.coerce.date(),
-  }),
+  schema: z.discriminatedUnion('kind', [
+    // 通常の条文 (第一条〜第百三条)
+    z.object({
+      kind: z.literal('article'),
+      id: z.string(),
+      chapter: z.string(),
+      number: z.number(),
+      paragraphs: z.array(
+        z.object({
+          no: z.number(),
+          text: z.string(),
+        }),
+      ),
+      source_url: z.string().url(),
+      retrieved_at: z.coerce.date(),
+    }),
+    // 前文。章・条文番号を持たない
+    z.object({
+      kind: z.literal('preamble'),
+      id: z.string(),
+      paragraphs: z.array(
+        z.object({
+          no: z.number(),
+          text: z.string(),
+        }),
+      ),
+      source_url: z.string().url(),
+      retrieved_at: z.coerce.date(),
+    }),
+  ]),
 });
 
 export const collections = { articles };
