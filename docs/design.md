@@ -165,6 +165,7 @@ date: 2026-01-01
 venue: "<会議名>"
 excerpt: "<短い抜粋>"      # 全文転載はしない
 summary: "<自分の言葉による要約>"
+summary_source: ai          # human | ai (summary を書いたのが人かAIかを明示し、画面にも表示する)
 source_url: "<会議録URL>"
 archive_url: "<アーカイブURL>"
 accessed_at: 2026-10-31
@@ -181,6 +182,7 @@ verified: true
 | `source_type` | 一次資料(条文・会議録)、報道、団体・政党の見解を区別する |
 | `archive_url` / `accessed_at` | 元ページ・投稿の削除に備え、根拠を残す |
 | `verified` | 人の確認が済んでいるか。未確認は公開しない |
+| `summary_source` | `summary`(要約)を書いたのが人かAIかを示す。AIの場合は画面上に「AIによる要約」と明記する(`excerpt` は発言そのものの抜粋なので対象外) |
 
 ---
 

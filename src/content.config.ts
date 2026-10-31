@@ -80,6 +80,8 @@ const comments = defineCollection({
     venue: z.string(),
     excerpt: z.string(),
     summary: z.string(),
+    // summary (自分の言葉による要約) を書いたのが人かAIかを明示する。画面上にも表示する。
+    summary_source: z.enum(['human', 'ai']),
     // 未確認の場合は空欄にする運用のため、URL形式を強制しない。
     source_url: z.string(),
     archive_url: z.string(),
