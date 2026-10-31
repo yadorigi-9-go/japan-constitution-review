@@ -9,12 +9,14 @@ export function articleLabel(id: string): string {
 }
 
 export async function computeDraftArticleDiff(entry: CollectionEntry<'draftArticles'>) {
-  // renamed_from があれば、新設ではなく条番号が変わった既存条文として扱い、
-  // diff は renamed_from 側の現行条文と比較する。
-  const lookupId = entry.data.renamed_from ?? entry.data.id;
-  const current = await getEntry('articles', lookupId);
+  // is_new: true の場合は、id が現行条文と番号が衝突していても一切比較しない
+  // (新設章の挿入で、無関係な現行条文と番号が偶然重なることがあるため)。
+  // renamed_from があれば、条番号が変わった既存条文として扱い、renamed_from 側の
+  // 現行条文と比較する。
+  const lookupId = entry.data.is_new ? null : (entry.data.renamed_from ?? entry.data.id);
+  const current = lookupId ? await getEntry('articles', lookupId) : undefined;
   const isRenamed = Boolean(entry.data.renamed_from) && entry.data.renamed_from !== entry.data.id;
-  const isNew = !current || current.data.kind !== 'article';
+  const isNew = entry.data.is_new || !current || current.data.kind !== 'article';
   const oldParagraphs = !isNew && current && current.data.kind === 'article' ? current.data.paragraphs : [];
   const newParagraphs = entry.data.paragraphs;
 

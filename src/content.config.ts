@@ -149,16 +149,28 @@ const draftArticles = defineCollection({
     // この条文の変更内容を要約した短いタイトル(Issue風の一覧・見出しに使う)。評価語は使わず、
     // 何が変わったかを事実として記述する(例: "戦力不保持規定の削除")。
     title: z.string(),
+    // 現行条文との対応が本当にない(真に新設)かどうかを明示する。
+    // 新設章の挿入等により、この draft 条文の id (番号) と同じ番号の“別内容”の
+    // 現行条文がたまたま存在することがある(例: 新設の draft art-098「緊急事態の宣言」
+    // に対し、現行 art-098 は無関係な「基本的人権の本質」)。is_new: true の場合は
+    // id が現行条文と衝突していても一切比較しない。
+    is_new: z.boolean(),
     // 他章の新設等により条番号がずれた場合、改番前(現行)の条文idを指定する。
     // 例: 現行 art-096 が新設章の挿入により draft 側で art-100 に移った場合、
     //     id: art-100, renamed_from: art-096。diff は renamed_from 側の現行条文と比較する。
-    // 条番号が変わらない通常の改正・新設(枝番)では null のままでよい。
+    // is_new: false で、条番号が変わらない通常の改正では null のままでよい。
+    // is_new: true のときは無視される。
     renamed_from: z.string().nullable(),
     chapter: z.string(),
     number: z.number(),
     paragraphs: z.array(
       z.object({
         no: z.number(),
+        // この項が、現行条文のどの項(no)をベースにしているかを示す。
+        // 省略時はこの項自身の no と同じとみなす(項の挿入・並べ替えがない通常のケース)。
+        // 現行に対応する項がない(新設の項)場合は null を明示する。
+        // 項の挿入・並べ替えがあるときに、項番号のずれで誤った項同士を比較しないための指定。
+        based_on: z.number().nullable().optional(),
         text: z.string(),
       }),
     ),
