@@ -1,3 +1,13 @@
+# Astro build output / generated types
+dist/
+.astro/
+
+# macOS
+.DS_Store
+
+# 再生成可能な生データ(APIから取得、人の確認前)。コミットしない。
+data/raw/
+
 # Logs
 logs
 *.log
