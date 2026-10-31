@@ -1,0 +1,9 @@
+kind: article
+id: art-042
+chapter: 第四章
+number: 42
+paragraphs:
+  - no: 1
+    text: "国会は、衆議院及び参議院の両議院でこれを構成する。"
+source_url: "https://laws.e-gov.go.jp/law/321CONSTITUTION"
+retrieved_at: 2026-10-31

@@ -1,0 +1,11 @@
+kind: article
+id: art-024
+chapter: 第三章
+number: 24
+paragraphs:
+  - no: 1
+    text: "婚姻は、両性の合意のみに基いて成立し、夫婦が同等の権利を有することを基本として、相互の協力により、維持されなければならない。"
+  - no: 2
+    text: "配偶者の選択、財産権、相続、住居の選定、離婚並びに婚姻及び家族に関するその他の事項に関しては、法律は、個人の尊厳と両性の本質的平等に立脚して、制定されなければならない。"
+source_url: "https://laws.e-gov.go.jp/law/321CONSTITUTION"
+retrieved_at: 2026-10-31

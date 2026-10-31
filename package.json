@@ -10,7 +10,8 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "fetch:articles": "python3 scripts/fetch_articles.py"
   },
   "dependencies": {
     "astro": "^7.4.4"

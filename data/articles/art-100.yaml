@@ -1,0 +1,11 @@
+kind: article
+id: art-100
+chapter: 第十一章
+number: 100
+paragraphs:
+  - no: 1
+    text: "この憲法は、公布の日から起算して六箇月を経過した日から、これを施行する。"
+  - no: 2
+    text: "この憲法を施行するために必要な法律の制定、参議院議員の選挙及び国会召集の手続並びにこの憲法を施行するために必要な準備手続は、前項の期日よりも前に、これを行ふことができる。"
+source_url: "https://laws.e-gov.go.jp/law/321CONSTITUTION"
+retrieved_at: 2026-10-31

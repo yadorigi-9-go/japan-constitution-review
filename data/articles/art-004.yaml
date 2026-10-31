@@ -1,0 +1,11 @@
+kind: article
+id: art-004
+chapter: 第一章
+number: 4
+paragraphs:
+  - no: 1
+    text: "天皇は、この憲法の定める国事に関する行為のみを行ひ、国政に関する権能を有しない。"
+  - no: 2
+    text: "天皇は、法律の定めるところにより、その国事に関する行為を委任することができる。"
+source_url: "https://laws.e-gov.go.jp/law/321CONSTITUTION"
+retrieved_at: 2026-10-31

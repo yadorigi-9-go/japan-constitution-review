@@ -1,0 +1,11 @@
+kind: article
+id: art-058
+chapter: 第四章
+number: 58
+paragraphs:
+  - no: 1
+    text: "両議院は、各々その議長その他の役員を選任する。"
+  - no: 2
+    text: "両議院は、各々その会議その他の手続及び内部の規律に関する規則を定め、又、院内の秩序をみだした議員を懲罰することができる。但し、議員を除名するには、出席議員の三分の二以上の多数による議決を必要とする。"
+source_url: "https://laws.e-gov.go.jp/law/321CONSTITUTION"
+retrieved_at: 2026-10-31

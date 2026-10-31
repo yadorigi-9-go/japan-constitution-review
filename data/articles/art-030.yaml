@@ -1,0 +1,9 @@
+kind: article
+id: art-030
+chapter: 第三章
+number: 30
+paragraphs:
+  - no: 1
+    text: "国民は、法律の定めるところにより、納税の義務を負ふ。"
+source_url: "https://laws.e-gov.go.jp/law/321CONSTITUTION"
+retrieved_at: 2026-10-31

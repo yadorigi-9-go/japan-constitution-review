@@ -1,0 +1,9 @@
+kind: article
+id: art-050
+chapter: 第四章
+number: 50
+paragraphs:
+  - no: 1
+    text: "両議院の議員は、法律の定める場合を除いては、国会の会期中逮捕されず、会期前に逮捕された議員は、その議院の要求があれば、会期中これを釈放しなければならない。"
+source_url: "https://laws.e-gov.go.jp/law/321CONSTITUTION"
+retrieved_at: 2026-10-31

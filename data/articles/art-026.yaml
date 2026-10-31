@@ -1,0 +1,11 @@
+kind: article
+id: art-026
+chapter: 第三章
+number: 26
+paragraphs:
+  - no: 1
+    text: "すべて国民は、法律の定めるところにより、その能力に応じて、ひとしく教育を受ける権利を有する。"
+  - no: 2
+    text: "すべて国民は、法律の定めるところにより、その保護する子女に普通教育を受けさせる義務を負ふ。義務教育は、これを無償とする。"
+source_url: "https://laws.e-gov.go.jp/law/321CONSTITUTION"
+retrieved_at: 2026-10-31

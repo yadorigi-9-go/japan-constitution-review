@@ -1,0 +1,9 @@
+kind: article
+id: art-013
+chapter: 第三章
+number: 13
+paragraphs:
+  - no: 1
+    text: "すべて国民は、個人として尊重される。生命、自由及び幸福追求に対する国民の権利については、公共の福祉に反しない限り、立法その他の国政の上で、最大の尊重を必要とする。"
+source_url: "https://laws.e-gov.go.jp/law/321CONSTITUTION"
+retrieved_at: 2026-10-31

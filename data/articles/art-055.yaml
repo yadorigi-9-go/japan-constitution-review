@@ -1,0 +1,9 @@
+kind: article
+id: art-055
+chapter: 第四章
+number: 55
+paragraphs:
+  - no: 1
+    text: "両議院は、各々その議員の資格に関する争訟を裁判する。但し、議員の議席を失はせるには、出席議員の三分の二以上の多数による議決を必要とする。"
+source_url: "https://laws.e-gov.go.jp/law/321CONSTITUTION"
+retrieved_at: 2026-10-31

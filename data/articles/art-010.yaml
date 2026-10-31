@@ -1,0 +1,9 @@
+kind: article
+id: art-010
+chapter: 第三章
+number: 10
+paragraphs:
+  - no: 1
+    text: "日本国民たる要件は、法律でこれを定める。"
+source_url: "https://laws.e-gov.go.jp/law/321CONSTITUTION"
+retrieved_at: 2026-10-31

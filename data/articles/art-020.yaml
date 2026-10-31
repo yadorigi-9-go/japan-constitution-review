@@ -1,0 +1,13 @@
+kind: article
+id: art-020
+chapter: 第三章
+number: 20
+paragraphs:
+  - no: 1
+    text: "信教の自由は、何人に対してもこれを保障する。いかなる宗教団体も、国から特権を受け、又は政治上の権力を行使してはならない。"
+  - no: 2
+    text: "何人も、宗教上の行為、祝典、儀式又は行事に参加することを強制されない。"
+  - no: 3
+    text: "国及びその機関は、宗教教育その他いかなる宗教的活動もしてはならない。"
+source_url: "https://laws.e-gov.go.jp/law/321CONSTITUTION"
+retrieved_at: 2026-10-31

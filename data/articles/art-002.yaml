@@ -1,0 +1,9 @@
+kind: article
+id: art-002
+chapter: 第一章
+number: 2
+paragraphs:
+  - no: 1
+    text: "皇位は、世襲のものであつて、国会の議決した皇室典範の定めるところにより、これを継承する。"
+source_url: "https://laws.e-gov.go.jp/law/321CONSTITUTION"
+retrieved_at: 2026-10-31

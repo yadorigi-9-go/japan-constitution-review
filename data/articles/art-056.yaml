@@ -1,0 +1,11 @@
+kind: article
+id: art-056
+chapter: 第四章
+number: 56
+paragraphs:
+  - no: 1
+    text: "両議院は、各々その総議員の三分の一以上の出席がなければ、議事を開き議決することができない。"
+  - no: 2
+    text: "両議院の議事は、この憲法に特別の定のある場合を除いては、出席議員の過半数でこれを決し、可否同数のときは、議長の決するところによる。"
+source_url: "https://laws.e-gov.go.jp/law/321CONSTITUTION"
+retrieved_at: 2026-10-31

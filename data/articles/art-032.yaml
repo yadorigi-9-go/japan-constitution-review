@@ -1,0 +1,9 @@
+kind: article
+id: art-032
+chapter: 第三章
+number: 32
+paragraphs:
+  - no: 1
+    text: "何人も、裁判所において裁判を受ける権利を奪はれない。"
+source_url: "https://laws.e-gov.go.jp/law/321CONSTITUTION"
+retrieved_at: 2026-10-31

@@ -1,0 +1,11 @@
+kind: article
+id: art-064
+chapter: 第四章
+number: 64
+paragraphs:
+  - no: 1
+    text: "国会は、罷免の訴追を受けた裁判官を裁判するため、両議院の議員で組織する弾劾裁判所を設ける。"
+  - no: 2
+    text: "弾劾に関する事項は、法律でこれを定める。"
+source_url: "https://laws.e-gov.go.jp/law/321CONSTITUTION"
+retrieved_at: 2026-10-31

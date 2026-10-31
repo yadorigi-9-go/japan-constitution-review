@@ -1,0 +1,9 @@
+kind: article
+id: art-052
+chapter: 第四章
+number: 52
+paragraphs:
+  - no: 1
+    text: "国会の常会は、毎年一回これを召集する。"
+source_url: "https://laws.e-gov.go.jp/law/321CONSTITUTION"
+retrieved_at: 2026-10-31

@@ -1,0 +1,9 @@
+kind: article
+id: art-101
+chapter: 第十一章
+number: 101
+paragraphs:
+  - no: 1
+    text: "この憲法施行の際、参議院がまだ成立してゐないときは、その成立するまでの間、衆議院は、国会としての権限を行ふ。"
+source_url: "https://laws.e-gov.go.jp/law/321CONSTITUTION"
+retrieved_at: 2026-10-31

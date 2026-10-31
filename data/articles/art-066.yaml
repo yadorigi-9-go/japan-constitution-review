@@ -1,0 +1,13 @@
+kind: article
+id: art-066
+chapter: 第五章
+number: 66
+paragraphs:
+  - no: 1
+    text: "内閣は、法律の定めるところにより、その首長たる内閣総理大臣及びその他の国務大臣でこれを組織する。"
+  - no: 2
+    text: "内閣総理大臣その他の国務大臣は、文民でなければならない。"
+  - no: 3
+    text: "内閣は、行政権の行使について、国会に対し連帯して責任を負ふ。"
+source_url: "https://laws.e-gov.go.jp/law/321CONSTITUTION"
+retrieved_at: 2026-10-31

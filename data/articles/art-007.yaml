@@ -1,0 +1,9 @@
+kind: article
+id: art-007
+chapter: 第一章
+number: 7
+paragraphs:
+  - no: 1
+    text: "天皇は、内閣の助言と承認により、国民のために、左の国事に関する行為を行ふ。"
+source_url: "https://laws.e-gov.go.jp/law/321CONSTITUTION"
+retrieved_at: 2026-10-31

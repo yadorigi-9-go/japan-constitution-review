@@ -1,0 +1,11 @@
+kind: article
+id: art-068
+chapter: 第五章
+number: 68
+paragraphs:
+  - no: 1
+    text: "内閣総理大臣は、国務大臣を任命する。但し、その過半数は、国会議員の中から選ばれなければならない。"
+  - no: 2
+    text: "内閣総理大臣は、任意に国務大臣を罷免することができる。"
+source_url: "https://laws.e-gov.go.jp/law/321CONSTITUTION"
+retrieved_at: 2026-10-31

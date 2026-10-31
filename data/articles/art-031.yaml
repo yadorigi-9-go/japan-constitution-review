@@ -1,0 +1,9 @@
+kind: article
+id: art-031
+chapter: 第三章
+number: 31
+paragraphs:
+  - no: 1
+    text: "何人も、法律の定める手続によらなければ、その生命若しくは自由を奪はれ、又はその他の刑罰を科せられない。"
+source_url: "https://laws.e-gov.go.jp/law/321CONSTITUTION"
+retrieved_at: 2026-10-31

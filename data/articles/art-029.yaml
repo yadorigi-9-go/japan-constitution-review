@@ -1,0 +1,13 @@
+kind: article
+id: art-029
+chapter: 第三章
+number: 29
+paragraphs:
+  - no: 1
+    text: "財産権は、これを侵してはならない。"
+  - no: 2
+    text: "財産権の内容は、公共の福祉に適合するやうに、法律でこれを定める。"
+  - no: 3
+    text: "私有財産は、正当な補償の下に、これを公共のために用ひることができる。"
+source_url: "https://laws.e-gov.go.jp/law/321CONSTITUTION"
+retrieved_at: 2026-10-31

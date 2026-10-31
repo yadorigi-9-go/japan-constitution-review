@@ -1,0 +1,11 @@
+kind: article
+id: art-035
+chapter: 第三章
+number: 35
+paragraphs:
+  - no: 1
+    text: "何人も、その住居、書類及び所持品について、侵入、捜索及び押収を受けることのない権利は、第三十三条の場合を除いては、正当な理由に基いて発せられ、且つ捜索する場所及び押収する物を明示する令状がなければ、侵されない。"
+  - no: 2
+    text: "捜索又は押収は、権限を有する司法官憲が発する各別の令状により、これを行ふ。"
+source_url: "https://laws.e-gov.go.jp/law/321CONSTITUTION"
+retrieved_at: 2026-10-31

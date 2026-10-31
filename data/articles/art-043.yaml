@@ -1,0 +1,11 @@
+kind: article
+id: art-043
+chapter: 第四章
+number: 43
+paragraphs:
+  - no: 1
+    text: "両議院は、全国民を代表する選挙された議員でこれを組織する。"
+  - no: 2
+    text: "両議院の議員の定数は、法律でこれを定める。"
+source_url: "https://laws.e-gov.go.jp/law/321CONSTITUTION"
+retrieved_at: 2026-10-31
