@@ -1,0 +1,21 @@
+id: art-054
+title: "衆議院の解散権者が「内閣総理大臣」であることを明記"
+is_new: false
+renamed_from: null
+chapter: 第四章
+number: 54
+paragraphs:
+  - no: 1
+    based_on: null
+    text: "衆議院の解散は、内閣総理大臣が決定する。"
+  - no: 2
+    based_on: 1
+    text: "衆議院が解散されたときは、解散の日から四十日以内に、衆議院議員の総選挙を行い、その選挙の日から三十日以内に、特別国会が召集されなければならない。"
+  - no: 3
+    based_on: 2
+    text: "衆議院が解散されたときは、参議院は、同時に閉会となる。ただし、内閣は、国に緊急の必要があるときは、参議院の緊急集会を求めることができる。"
+  - no: 4
+    based_on: 3
+    text: "前項ただし書の緊急集会において採られた措置は、臨時のものであって、次の国会開会の後十日以内に、衆議院の同意がない場合には、その効力を失う。"
+source_url: "https://storage.jimin.jp/pdf/news/policy/130250_1.pdf"
+retrieved_at: 2026-11-01
