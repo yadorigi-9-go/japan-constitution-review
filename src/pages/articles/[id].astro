@@ -29,6 +29,49 @@ const comments = (await getCollection('comments')).filter(
 const stanceLabel = { support: '賛成', oppose: '反対', neutral: '中立' } as const;
 const claimTypeLabel = { fact: '事実', interpretation: '解釈', concern: '懸念・予測', quote: '引用' } as const;
 const base = import.meta.env.BASE_URL;
+
+// この条文を変更・削除している改憲案への逆リンク (条文ページ→改憲案)。
+// is_new の草案条文は、番号が偶然衝突していても比較対象ではないため対象外にする
+// (docs/design.md 5.2)。改番されている場合は renamed_from を実際の対象として扱う。
+interface AffectingDraft {
+  draftName: string;
+  title: string;
+  href: string;
+  isDeleted: boolean;
+}
+
+const drafts = await getCollection('drafts');
+const draftById = new Map(drafts.map((draft) => [draft.id, draft]));
+
+const affectingDrafts: AffectingDraft[] = [];
+
+for (const entry of await getCollection('draftArticles')) {
+  if (entry.data.is_new) continue;
+  const affectedId = entry.data.renamed_from ?? entry.data.id;
+  if (affectedId !== article.id) continue;
+  const draftId = entry.id.split('/')[0];
+  const draft = draftById.get(draftId);
+  if (!draft) continue;
+  affectingDrafts.push({
+    draftName: draft.data.name,
+    title: entry.data.title,
+    href: `${base}drafts/${draftId}/${entry.data.id}`,
+    isDeleted: false,
+  });
+}
+
+for (const entry of await getCollection('draftDeletions')) {
+  if (entry.data.id !== article.id) continue;
+  const draftId = entry.id.split('/')[0];
+  const draft = draftById.get(draftId);
+  if (!draft) continue;
+  affectingDrafts.push({
+    draftName: draft.data.name,
+    title: entry.data.title,
+    href: `${base}drafts/${draftId}/deleted/${entry.data.id}`,
+    isDeleted: true,
+  });
+}
 ---
 
 <BaseLayout title={`${pageTitle} | 日本国憲法レビュー`} description={description}>
@@ -66,6 +109,32 @@ const base = import.meta.env.BASE_URL;
 			</div>
 		</div>
 	</div>
+
+	{affectingDrafts.length > 0 && (
+		<section class="mt-6">
+			<h2 class="font-mono mb-3 text-sm" style="color: var(--ink-muted);">この条文を変更・削除している改憲案({affectingDrafts.length})</h2>
+			<ul class="divide-y border-t border-b" style="border-color: var(--line);">
+				{affectingDrafts.map((d) => (
+					<li class="flex items-start gap-3 py-2">
+						<span
+							class="mt-1.5 inline-block h-3 w-3 shrink-0 rounded-full"
+							style={`background: var(${d.isDeleted ? '--ink-muted' : '--seal'});`}
+							aria-hidden="true"
+						/>
+						<div>
+							<a href={d.href} class="no-underline hover:underline">
+								<span class="font-mincho" style="color: var(--ink);">{d.title}</span>
+							</a>
+							<p class="font-mono mt-0.5 text-xs" style="color: var(--ink-muted);">
+								{d.draftName}
+								{d.isDeleted && <span class="tag">削除</span>}
+							</p>
+						</div>
+					</li>
+				))}
+			</ul>
+		</section>
+	)}
 
 	{comments.length > 0 && (
 		<section class="mt-8">
