@@ -8,10 +8,10 @@
 	--ink: #1f2328;
 	--ink-muted: #656d76;
 	--line: #d1d9e0;
-	--seal: #d1242f;
-	--seal-bg: #ffebe9;
-	--bamboo: #1a7f37;
-	--bamboo-bg: #dafbe1;
+	--danger: #d1242f;
+	--danger-bg: #ffebe9;
+	--success: #1a7f37;
+	--success-bg: #dafbe1;
 	--link: #0969da;
 }
 
@@ -21,10 +21,10 @@
 	--ink: #e6edf3;
 	--ink-muted: #848d97;
 	--line: #30363d;
-	--seal: #f85149;
-	--seal-bg: #3d1216;
-	--bamboo: #3fb950;
-	--bamboo-bg: #0f2e18;
+	--danger: #f85149;
+	--danger-bg: #3d1216;
+	--success: #3fb950;
+	--success-bg: #0f2e18;
 	--link: #4493f8;
 }
 
@@ -35,10 +35,10 @@
 		--ink: #e6edf3;
 		--ink-muted: #848d97;
 		--line: #30363d;
-		--seal: #f85149;
-		--seal-bg: #3d1216;
-		--bamboo: #3fb950;
-		--bamboo-bg: #0f2e18;
+		--danger: #f85149;
+		--danger-bg: #3d1216;
+		--success: #3fb950;
+		--success-bg: #0f2e18;
 		--link: #4493f8;
 	}
 }
@@ -67,14 +67,14 @@ a:hover {
 
 /* diff 表示 (jsdiff ins/del)。del はブラウザ既定の取り消し線をそのまま使う。 */
 ins {
-	background: var(--bamboo-bg);
-	color: var(--bamboo);
+	background: var(--success-bg);
+	color: var(--success);
 	text-decoration: none;
 }
 
 del {
-	background: var(--seal-bg);
-	color: var(--seal);
+	background: var(--danger-bg);
+	color: var(--danger);
 }
 
 /* 一覧・PR一覧などの行ラベル */
@@ -89,9 +89,9 @@ del {
 }
 
 .tag-new {
-	border-color: var(--seal);
-	color: var(--seal);
-	background: var(--seal-bg);
+	border-color: var(--danger);
+	color: var(--danger);
+	background: var(--danger-bg);
 }
 
 /* コメント(PRレビュー)カード。stance で左罫線の色を変える */
@@ -101,11 +101,11 @@ del {
 }
 
 .comment-card[data-stance="support"] {
-	border-left-color: var(--bamboo);
+	border-left-color: var(--success);
 }
 
 .comment-card[data-stance="oppose"] {
-	border-left-color: var(--seal);
+	border-left-color: var(--danger);
 }
 
 /* コメントのアバター(頭文字円) */
