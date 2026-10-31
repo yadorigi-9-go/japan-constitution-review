@@ -17,10 +17,12 @@ interface Props {
 
 const { draft } = Astro.props;
 
-// id が "<draftId>/art-XXX" になっている (src/content.config.ts の generateId)
+// id が "<draftId>/art-XXX" になっている (src/content.config.ts の generateId)。
+// 前文は number を持たないため、文字列比較だと "art-*" より後ろに来てしまう。
+// 常に先頭に来るよう、前文は -1 として扱う。
 const changedArticles = (await getCollection('draftArticles'))
   .filter((entry) => entry.id.startsWith(`${draft.id}/`))
-  .sort((a, b) => a.data.id.localeCompare(b.data.id));
+  .sort((a, b) => (a.data.number ?? -1) - (b.data.number ?? -1));
 
 // 条文ごと削除される項目 (id が "<draftId>/del-art-XXX" になっている)
 const deletedArticles = (await getCollection('draftDeletions'))
