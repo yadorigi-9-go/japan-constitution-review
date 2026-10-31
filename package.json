@@ -14,8 +14,10 @@
     "fetch:articles": "python3 scripts/fetch_articles.py"
   },
   "dependencies": {
+    "@tailwindcss/vite": "^4.3.3",
     "astro": "^7.4.4",
-    "diff": "^9.0.0"
+    "diff": "^9.0.0",
+    "tailwindcss": "^4.3.3"
   },
   "devDependencies": {
     "pagefind": "^1.5.2"

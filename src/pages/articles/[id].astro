@@ -1,5 +1,6 @@
 ---
 import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
 
 export async function getStaticPaths() {
   const articles = await getCollection('articles');
@@ -22,62 +23,84 @@ const comments = (await getCollection('comments')).filter(
 
 const stanceLabel = { support: '賛成', oppose: '反対', neutral: '中立' } as const;
 const claimTypeLabel = { fact: '事実', interpretation: '解釈', concern: '懸念・予測', quote: '引用' } as const;
+const base = import.meta.env.BASE_URL;
 ---
 
-<html lang="ja">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href={`${import.meta.env.BASE_URL}favicon.svg`} />
-		<link rel="icon" href={`${import.meta.env.BASE_URL}favicon.ico`} />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>{pageTitle} | 日本国憲法レビュー</title>
-	</head>
-	<body>
-		<p><a href={import.meta.env.BASE_URL}>&larr; トップへ戻る</a></p>
-		{kind === 'article' && <p>{article.data.chapter}</p>}
-		<h1>{heading}</h1>
-		{kind === 'preamble' ? (
-			<>
-				<p>※ 段落分けは表示の都合上付与したものであり、原文(官報)に段落番号はありません。</p>
-				{paragraphs.map((paragraph) => <p>{paragraph.text}</p>)}
-			</>
-		) : (
-			<ol>
+<BaseLayout title={`${pageTitle} | 日本国憲法レビュー`}>
+	<p class="font-mono mb-4 text-sm">
+		<a href={base}>&larr; 条文一覧</a>
+	</p>
+
+	<div class="overflow-hidden rounded-md border" style="border-color: var(--line);">
+		<div class="font-mono flex items-center gap-2 border-b px-3 py-2 text-xs" style="border-color: var(--line); background: var(--paper-raised); color: var(--ink-muted);">
+			<span>data/articles/{article.id}.yaml</span>
+		</div>
+		<div class="px-4 py-5">
+			{kind === 'article' && (
+				<p class="font-mono mb-1 text-xs" style="color: var(--ink-muted);">{article.data.chapter}</p>
+			)}
+			<h1 class="font-mincho mb-4 text-2xl" style="color: var(--ink);">{heading}</h1>
+
+			{kind === 'preamble' && (
+				<p class="mb-3 text-sm" style="color: var(--ink-muted);">
+					※ 段落分けは表示の都合上付与したものであり、原文(官報)に段落番号はありません。
+				</p>
+			)}
+
+			<div class="font-mincho divide-y" style="border-color: var(--line);">
 				{paragraphs.map((paragraph) => (
-					<li value={paragraph.no}>{paragraph.text}</li>
+					<div class="flex gap-4 py-2 leading-relaxed">
+						{kind === 'article' && (
+							<span class="font-mono shrink-0 pt-0.5 text-right text-xs" style="width: 1.5rem; color: var(--ink-muted);">
+								{paragraph.no}
+							</span>
+						)}
+						<p style="color: var(--ink);">{paragraph.text}</p>
+					</div>
 				))}
-			</ol>
-		)}
-		{comments.length > 0 && (
-			<section>
-				<h2>この条文についてのコメント</h2>
-				<ul>
-					{comments.map((comment) => (
-						<li>
-							<p>
-								<strong>{comment.data.speaker.name}</strong>
-								({comment.data.speaker.role}・{comment.data.speaker.party}) —
-								{stanceLabel[comment.data.stance]} / {claimTypeLabel[comment.data.claim_type]}
+			</div>
+		</div>
+	</div>
+
+	{comments.length > 0 && (
+		<section class="mt-8">
+			<h2 class="font-mono mb-3 text-sm" style="color: var(--ink-muted);">この条文についてのコメント({comments.length})</h2>
+			<ul class="space-y-4">
+				{comments.map((comment) => (
+					<li class="overflow-hidden rounded-md border" style="border-color: var(--line);">
+						<div class="flex items-center gap-2 border-b px-3 py-2 text-sm" style="border-color: var(--line); background: var(--paper-raised);">
+							<span class="avatar" aria-hidden="true">{comment.data.speaker.name.slice(0, 1)}</span>
+							<strong style="color: var(--ink);">{comment.data.speaker.name}</strong>
+							<span class="tag">{comment.data.speaker.party}</span>
+							<span class="font-mono ml-auto text-xs" style="color: var(--ink-muted);">
+								{comment.data.date.toISOString().slice(0, 10)}
+							</span>
+						</div>
+						<div class="comment-card m-3" data-stance={comment.data.stance}>
+							<p class="mb-2 text-xs" style="color: var(--ink-muted);">
+								{comment.data.speaker.role} ・ {stanceLabel[comment.data.stance]} ・ {claimTypeLabel[comment.data.claim_type]}
 							</p>
-							<blockquote>{comment.data.excerpt}</blockquote>
-							<p>{comment.data.summary}</p>
-							<p>
-								{comment.data.venue}({comment.data.date.toISOString().slice(0, 10)})
+							<blockquote class="font-mincho mb-2 border-l-2 pl-3" style="border-color: var(--line); color: var(--ink);">
+								{comment.data.excerpt}
+							</blockquote>
+							<p class="mb-1 text-sm" style="color: var(--ink);">{comment.data.summary}</p>
+							<p class="font-mono text-xs" style="color: var(--ink-muted);">
+								{comment.data.venue}
 								{comment.data.source_url && (
 									<>
-										{' '}/ 出典: <a href={comment.data.source_url}>{comment.data.source_url}</a>
+										{' '}/ <a href={comment.data.source_url}>出典</a>
 									</>
 								)}
 							</p>
-						</li>
-					))}
-				</ul>
-			</section>
-		)}
-		<footer>
-			<p>出典: <a href={source_url}>{source_url}</a></p>
-			<p>最終確認日: {lastChecked}</p>
-		</footer>
-	</body>
-</html>
+						</div>
+					</li>
+				))}
+			</ul>
+		</section>
+	)}
+
+	<footer class="font-mono mt-8 text-xs" style="color: var(--ink-muted);">
+		<p>出典: <a href={source_url}>{source_url}</a></p>
+		<p>最終確認日: {lastChecked}</p>
+	</footer>
+</BaseLayout>

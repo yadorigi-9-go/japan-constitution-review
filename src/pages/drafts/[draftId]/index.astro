@@ -1,6 +1,7 @@
 ---
 import { getCollection, getEntry } from 'astro:content';
 import { diffChars } from 'diff';
+import BaseLayout from '../../../layouts/BaseLayout.astro';
 
 export async function getStaticPaths() {
   const drafts = await getCollection('drafts');
@@ -43,52 +44,47 @@ const rows = await Promise.all(
     return { id: entry.data.id, isNew, paragraphDiffs };
   }),
 );
+
+const base = import.meta.env.BASE_URL;
 ---
 
-<html lang="ja">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href={`${import.meta.env.BASE_URL}favicon.svg`} />
-		<link rel="icon" href={`${import.meta.env.BASE_URL}favicon.ico`} />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>{draft.data.name} | 日本国憲法レビュー</title>
-		<style>
-			ins { background: #e6ffed; text-decoration: none; }
-			del { background: #ffeef0; }
-			.paragraph-diff { margin-bottom: 1em; }
-		</style>
-	</head>
-	<body>
-		<p><a href={`${import.meta.env.BASE_URL}drafts`}>&larr; 改憲案一覧へ戻る</a></p>
-		<h1>{draft.data.name}</h1>
+<BaseLayout title={`${draft.data.name} | 日本国憲法レビュー`}>
+	<p class="font-mono mb-4 text-sm">
+		<a href={`${base}drafts`}>&larr; 改憲案一覧</a>
+	</p>
+	<h1 class="font-mincho mb-2 text-xl" style="color: var(--ink);">{draft.data.name}</h1>
+	<div class="font-mono mb-8 space-y-0.5 text-xs" style="color: var(--ink-muted);">
 		<p>提案: {draft.data.proposer} / 公表日: {draft.data.published_at.toISOString().slice(0, 10)}</p>
 		<p>出典: <a href={draft.data.source_url}>{draft.data.source_url}</a></p>
 		<p>最終確認日: {draft.data.retrieved_at.toISOString().slice(0, 10)}</p>
+	</div>
 
+	<div class="space-y-6">
 		{rows.map((row) => (
-			<section>
-				<h2>
-					{articleLabel(row.id)}
-					{row.isNew && '(新設)'}
-				</h2>
-				{row.paragraphDiffs.map((pd) => (
-					<div class="paragraph-diff">
-						<p>{pd.no}</p>
-						<p>
-							{pd.parts.map((part) =>
-								part.added ? (
-									<ins>{part.value}</ins>
-								) : part.removed ? (
-									<del>{part.value}</del>
-								) : (
-									<span>{part.value}</span>
-								),
-							)}
-						</p>
-					</div>
-				))}
-			</section>
+			<div class="overflow-hidden rounded-md border" style="border-color: var(--line);">
+				<div class="font-mono flex items-center gap-2 border-b px-3 py-2 text-sm" style="border-color: var(--line); background: var(--paper-raised);">
+					<span class="font-mincho" style="color: var(--ink);">{articleLabel(row.id)}</span>
+					{row.isNew && <span class="tag tag-new">新設</span>}
+				</div>
+				<div class="font-mono px-3 py-3 text-sm leading-relaxed">
+					{row.paragraphDiffs.map((pd) => (
+						<div class="flex gap-3 py-1">
+							<span class="shrink-0 text-right" style="width: 1.5rem; color: var(--ink-muted);">{pd.no}</span>
+							<p style="color: var(--ink);">
+								{pd.parts.map((part) =>
+									part.added ? (
+										<ins>{part.value}</ins>
+									) : part.removed ? (
+										<del>{part.value}</del>
+									) : (
+										<span>{part.value}</span>
+									),
+								)}
+							</p>
+						</div>
+					))}
+				</div>
+			</div>
 		))}
-	</body>
-</html>
+	</div>
+</BaseLayout>

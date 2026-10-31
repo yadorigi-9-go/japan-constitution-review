@@ -1,0 +1,85 @@
+---
+import '../styles/global.css';
+
+interface Props {
+	title: string;
+}
+
+const { title } = Astro.props;
+const base = import.meta.env.BASE_URL;
+const path = Astro.url.pathname;
+const isActive = (segment: string) => path === `${base}${segment}` || path.startsWith(`${base}${segment}/`);
+const tabs = [
+	{ href: base, label: '条文', icon: '📄', active: path === base || path.startsWith(`${base}articles/`) },
+	{ href: `${base}drafts`, label: '改憲案', icon: '🔀', active: isActive('drafts') },
+	{ href: `${base}search`, label: '検索', icon: '🔎', active: isActive('search') },
+];
+---
+
+<!doctype html>
+<html lang="ja">
+	<head>
+		<meta charset="utf-8" />
+		<link rel="icon" type="image/svg+xml" href={`${base}favicon.svg`} />
+		<link rel="icon" href={`${base}favicon.ico`} />
+		<meta name="viewport" content="width=device-width" />
+		<meta name="generator" content={Astro.generator} />
+		<title>{title}</title>
+		<slot name="head" />
+		<script is:inline>
+			// ちらつき防止のため、スタイル適用前に同期的にテーマを決定する。
+			(() => {
+				const stored = localStorage.getItem('theme');
+				const theme = stored ?? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+				document.documentElement.dataset.theme = theme;
+			})();
+		</script>
+	</head>
+	<body class="min-h-screen">
+		<header style={`background: var(--paper-raised); border-bottom: 1px solid var(--line);`}>
+			<div class="mx-auto flex max-w-4xl items-center gap-4 px-4 py-3">
+				<a href={base} class="font-mincho text-lg no-underline" style={`color: var(--ink);`}>
+					日本国憲法レビュー
+				</a>
+				<button id="theme-toggle" type="button" class="theme-toggle ml-auto" aria-label="配色を切り替え">
+					<span id="theme-toggle-icon">🌙</span>
+				</button>
+			</div>
+		</header>
+		<div style={`background: var(--paper); border-bottom: 1px solid var(--line);`}>
+			<nav class="font-mono mx-auto flex max-w-4xl gap-1 px-2 text-sm">
+				{tabs.map((tab) => (
+					<a
+						href={tab.href}
+						class="flex items-center gap-1.5 border-b-2 px-3 py-2.5 no-underline"
+						style={tab.active
+							? `border-color: var(--seal); color: var(--ink); font-weight: 600;`
+							: `border-color: transparent; color: var(--ink-muted);`}
+					>
+						<span aria-hidden="true">{tab.icon}</span>
+						{tab.label}
+					</a>
+				))}
+			</nav>
+		</div>
+		<script is:inline>
+			window.addEventListener('DOMContentLoaded', () => {
+				const button = document.getElementById('theme-toggle');
+				const icon = document.getElementById('theme-toggle-icon');
+				const updateIcon = () => {
+					icon.textContent = document.documentElement.dataset.theme === 'dark' ? '☀️' : '🌙';
+				};
+				updateIcon();
+				button.addEventListener('click', () => {
+					const next = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+					document.documentElement.dataset.theme = next;
+					localStorage.setItem('theme', next);
+					updateIcon();
+				});
+			});
+		</script>
+		<main class="mx-auto max-w-4xl px-4 py-6">
+			<slot />
+		</main>
+	</body>
+</html>

@@ -1,0 +1,141 @@
+@import "tailwindcss";
+@import url("https://fonts.googleapis.com/css2?family=BIZ+UDMincho&family=BIZ+UDGothic:wght@400;700&family=JetBrains+Mono:wght@400;500&display=swap");
+
+:root,
+:root[data-theme="light"] {
+	--paper: #ffffff;
+	--paper-raised: #f6f8fa;
+	--ink: #1f2328;
+	--ink-muted: #656d76;
+	--line: #d1d9e0;
+	--seal: #d1242f;
+	--seal-bg: #ffebe9;
+	--bamboo: #1a7f37;
+	--bamboo-bg: #dafbe1;
+	--link: #0969da;
+}
+
+:root[data-theme="dark"] {
+	--paper: #0d1117;
+	--paper-raised: #161b22;
+	--ink: #e6edf3;
+	--ink-muted: #848d97;
+	--line: #30363d;
+	--seal: #f85149;
+	--seal-bg: #3d1216;
+	--bamboo: #3fb950;
+	--bamboo-bg: #0f2e18;
+	--link: #4493f8;
+}
+
+@media (prefers-color-scheme: dark) {
+	:root {
+		--paper: #0d1117;
+		--paper-raised: #161b22;
+		--ink: #e6edf3;
+		--ink-muted: #848d97;
+		--line: #30363d;
+		--seal: #f85149;
+		--seal-bg: #3d1216;
+		--bamboo: #3fb950;
+		--bamboo-bg: #0f2e18;
+		--link: #4493f8;
+	}
+}
+
+body {
+	background: var(--paper);
+	color: var(--ink);
+	font-family: "BIZ UDGothic", "Hiragino Kaku Gothic ProN", sans-serif;
+}
+
+.font-mincho {
+	font-family: "BIZ UDMincho", "Hiragino Mincho ProN", serif;
+}
+
+.font-mono {
+	font-family: "JetBrains Mono", "BIZ UDGothic", monospace;
+}
+
+a {
+	color: var(--link);
+}
+
+a:hover {
+	text-decoration: underline;
+}
+
+/* diff 表示 (jsdiff ins/del)。del はブラウザ既定の取り消し線をそのまま使う。 */
+ins {
+	background: var(--bamboo-bg);
+	color: var(--bamboo);
+	text-decoration: none;
+}
+
+del {
+	background: var(--seal-bg);
+	color: var(--seal);
+}
+
+/* 一覧・PR一覧などの行ラベル */
+.tag {
+	display: inline-flex;
+	align-items: center;
+	border-radius: 999px;
+	padding: 0.1rem 0.6rem;
+	font-size: 0.75rem;
+	border: 1px solid var(--line);
+	color: var(--ink-muted);
+}
+
+.tag-new {
+	border-color: var(--seal);
+	color: var(--seal);
+	background: var(--seal-bg);
+}
+
+/* コメント(PRレビュー)カード。stance で左罫線の色を変える */
+.comment-card {
+	border-left: 3px solid var(--line);
+	padding: 0.5rem 0 0.5rem 0.75rem;
+}
+
+.comment-card[data-stance="support"] {
+	border-left-color: var(--bamboo);
+}
+
+.comment-card[data-stance="oppose"] {
+	border-left-color: var(--seal);
+}
+
+/* コメントのアバター(頭文字円) */
+.avatar {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 2.25rem;
+	height: 2.25rem;
+	border-radius: 50%;
+	background: var(--paper-raised);
+	border: 1px solid var(--line);
+	font-weight: 700;
+	flex-shrink: 0;
+}
+
+/* テーマ切り替えボタン */
+.theme-toggle {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 2rem;
+	height: 2rem;
+	border-radius: 6px;
+	border: 1px solid var(--line);
+	background: var(--paper-raised);
+	color: var(--ink-muted);
+	cursor: pointer;
+}
+
+.theme-toggle:hover {
+	background: var(--line);
+}

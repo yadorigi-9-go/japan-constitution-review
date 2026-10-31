@@ -1,5 +1,6 @@
 ---
 import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
 
 // 前文を先頭に、条文は条文番号(数値)の昇順で並べる。
 const articles = (await getCollection('articles')).sort((a, b) => {
@@ -20,34 +21,64 @@ for (const comment of verifiedComments) {
     commentCountByArticleId.set(articleId, (commentCountByArticleId.get(articleId) ?? 0) + 1);
   }
 }
+
+// 章ごとにグループ化する(前文は独立した行として扱う)。
+type Row = { chapter: string | null; items: typeof articles };
+const rows: Row[] = [];
+for (const article of articles) {
+  const chapter = article.data.kind === 'article' ? article.data.chapter : null;
+  const last = rows[rows.length - 1];
+  if (last && last.chapter === chapter) {
+    last.items.push(article);
+  } else {
+    rows.push({ chapter, items: [article] });
+  }
+}
+
+const base = import.meta.env.BASE_URL;
 ---
 
-<html lang="ja">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href={`${import.meta.env.BASE_URL}favicon.svg`} />
-		<link rel="icon" href={`${import.meta.env.BASE_URL}favicon.ico`} />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>日本国憲法レビュー(準備中)</title>
-	</head>
-	<body>
-		<h1>日本国憲法レビュー</h1>
-		<p>準備中です。設計は <a href="https://github.com/yadorigi-9-go/japan-constitution-review/blob/main/docs/design.md">docs/design.md</a> を参照してください。</p>
-		<p><a href={`${import.meta.env.BASE_URL}drafts`}>改憲案一覧</a></p>
-		<p><a href={`${import.meta.env.BASE_URL}search`}>検索</a></p>
-		<ul>
-			{articles.map((article) => {
-				const count = commentCountByArticleId.get(article.id) ?? 0;
-				return (
-					<li>
-						<a href={`${import.meta.env.BASE_URL}articles/${article.id}`}>
-							{article.data.kind === 'preamble' ? '前文' : `第${article.data.number}条`}
-						</a>
-						{count > 0 && ` (コメント${count}件)`}
-					</li>
-				);
-			})}
-		</ul>
-	</body>
-</html>
+<BaseLayout title="日本国憲法レビュー">
+	<p class="font-mono mb-6 text-sm" style="color: var(--ink-muted);">
+		日本国憲法を条文単位でレビューします。設計は
+		<a href="https://github.com/yadorigi-9-go/japan-constitution-review/blob/main/docs/design.md">docs/design.md</a
+		> を参照してください。
+	</p>
+
+	<div class="mb-8 flex gap-4 font-mono text-sm">
+		<a class="rounded-md border px-3 py-1.5 no-underline hover:underline" style="border-color: var(--line);" href={`${base}drafts`}>改憲案一覧 →</a>
+		<a class="rounded-md border px-3 py-1.5 no-underline hover:underline" style="border-color: var(--line);" href={`${base}search`}>検索 →</a>
+	</div>
+
+	<div class="border-t" style="border-color: var(--line);">
+		{rows.map((row) => (
+			<div>
+				{row.chapter && (
+					<p class="font-mono mt-4 px-1 py-1 text-xs tracking-wide" style="color: var(--ink-muted);">
+						{row.chapter}
+					</p>
+				)}
+				<ul class="divide-y" style="border-color: var(--line);">
+					{row.items.map((article) => {
+						const count = commentCountByArticleId.get(article.id) ?? 0;
+						const label = article.data.kind === 'preamble' ? '前文' : `第${article.data.number}条`;
+						return (
+							<li class="border-b" style="border-color: var(--line);">
+								<a
+									href={`${base}articles/${article.id}`}
+									class="flex items-baseline gap-3 px-1 py-2 no-underline hover:underline"
+								>
+									<span class="font-mono text-xs" style="color: var(--ink-muted);">{article.id}</span>
+									<span class="font-mincho" style="color: var(--ink);">{label}</span>
+									{count > 0 && (
+										<span class="tag font-mono ml-auto">コメント {count}</span>
+									)}
+								</a>
+							</li>
+						);
+					})}
+				</ul>
+			</div>
+		))}
+	</div>
+</BaseLayout>
