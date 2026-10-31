@@ -1,0 +1,15 @@
+id: art-016
+title: "請願権の条文を2項に分割(内容面の変更はなし)"
+is_new: false
+renamed_from: null
+chapter: 第三章
+number: 16
+paragraphs:
+  - no: 1
+    based_on: 1
+    text: "何人も、損害の救済、公務員の罷免、法律、命令又は規則の制定、廃止又は改正その他の事項に関し、平穏に請願をする権利を有する。"
+  - no: 2
+    based_on: 1
+    text: "請願をした者は、そのためにいかなる差別待遇も受けない。"
+source_url: "https://storage.jimin.jp/pdf/news/policy/130250_1.pdf"
+retrieved_at: 2026-11-01
