@@ -1,0 +1,20 @@
+id: c-0002
+article_ids: [art-009]
+draft_id: null
+kind: speech
+claim_type: interpretation
+stance: support
+source_type: primary
+speaker:
+  name: "和田政宗"
+  role: "衆議院議員"
+  party: "参政党"
+date: 2026-07-16
+venue: "衆議院憲法審査会"
+excerpt: "参政党は、根本的な憲法改正を行い、自衛のための軍隊、自衛軍を保持することを憲法草案で掲げています。"
+summary: "参政党の和田政宗衆議院議員が、自民党の「自衛隊明記」案では不十分だとして、自衛隊の活動方式(ポジティブリスト)が他国の国防軍(ネガティブリスト)と異なる点を指摘し、参政党独自の「自衛軍」保持案を説明した。"
+source_url: "https://kokkai.ndl.go.jp/txt/122104183X01320260716/10"
+archive_url: ""
+accessed_at: 2026-11-01
+tags: ["第9条", "安全保障", "国防軍"]
+verified: true

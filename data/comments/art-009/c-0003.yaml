@@ -1,0 +1,20 @@
+id: c-0003
+article_ids: [art-009]
+draft_id: null
+kind: speech
+claim_type: interpretation
+stance: oppose
+source_type: primary
+speaker:
+  name: "畑野君枝"
+  role: "衆議院議員"
+  party: "日本共産党"
+date: 2026-07-16
+venue: "衆議院憲法審査会"
+excerpt: "日本国憲法は戦争につながる一切のものを否定しているのであり、その核心が憲法九条です。"
+summary: "日本共産党の畑野君枝衆議院議員が、憲法審査会で9条を国防軍として位置づけるべきだとする主張があることに触れ、朝日新聞・東京大学の世論調査(改憲を政治の優先課題と考える人は1%)を引用しつつ、9条の精神に立脚した政治を求めた。"
+source_url: "https://kokkai.ndl.go.jp/txt/122104183X01320260716/14"
+archive_url: ""
+accessed_at: 2026-11-01
+tags: ["第9条", "安全保障", "国防軍"]
+verified: true
