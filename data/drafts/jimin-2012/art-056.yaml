@@ -1,0 +1,15 @@
+id: art-056
+title: "表決(可否同数時の議長裁決)と定足数の項番号を入れ替え、文言を整理"
+is_new: false
+renamed_from: null
+chapter: 第四章
+number: 56
+paragraphs:
+  - no: 1
+    based_on: 2
+    text: "両議院の議事は、この憲法に特別の定めのある場合を除いては、出席議員の過半数で決し、可否同数のときは、議長の決するところによる。"
+  - no: 2
+    based_on: 1
+    text: "両議院の議決は、各々その総議員の三分の一以上の出席がなければすることができない。"
+source_url: "https://storage.jimin.jp/pdf/news/policy/130250_1.pdf"
+retrieved_at: 2026-11-01
