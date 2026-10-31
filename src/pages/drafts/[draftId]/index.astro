@@ -1,0 +1,94 @@
+---
+import { getCollection, getEntry } from 'astro:content';
+import { diffChars } from 'diff';
+
+export async function getStaticPaths() {
+  const drafts = await getCollection('drafts');
+  return drafts.map((draft) => ({
+    params: { draftId: draft.id },
+    props: { draft },
+  }));
+}
+
+const { draft } = Astro.props;
+
+// id が "<draftId>/art-XXX" になっている (src/content.config.ts の generateId)
+const changedArticles = (await getCollection('draftArticles'))
+  .filter((entry) => entry.id.startsWith(`${draft.id}/`))
+  .sort((a, b) => a.data.id.localeCompare(b.data.id));
+
+function articleLabel(id: string): string {
+  const m = id.match(/^art-(\d+)(?:-(\d+))?$/);
+  if (!m) return id;
+  const num = Number(m[1]);
+  return m[2] ? `第${num}条の${Number(m[2])}` : `第${num}条`;
+}
+
+const rows = await Promise.all(
+  changedArticles.map(async (entry) => {
+    const current = await getEntry('articles', entry.data.id);
+    const isNew = !current || current.data.kind !== 'article';
+    const oldParagraphs = !isNew && current ? current.data.paragraphs : [];
+    const newParagraphs = entry.data.paragraphs;
+
+    const paragraphNos = [...new Set([...oldParagraphs, ...newParagraphs].map((p) => p.no))].sort(
+      (a, b) => a - b,
+    );
+    const paragraphDiffs = paragraphNos.map((no) => {
+      const oldText = oldParagraphs.find((p) => p.no === no)?.text ?? '';
+      const newText = newParagraphs.find((p) => p.no === no)?.text ?? '';
+      return { no, parts: diffChars(oldText, newText) };
+    });
+
+    return { id: entry.data.id, isNew, paragraphDiffs };
+  }),
+);
+---
+
+<html lang="ja">
+	<head>
+		<meta charset="utf-8" />
+		<link rel="icon" type="image/svg+xml" href={`${import.meta.env.BASE_URL}favicon.svg`} />
+		<link rel="icon" href={`${import.meta.env.BASE_URL}favicon.ico`} />
+		<meta name="viewport" content="width=device-width" />
+		<meta name="generator" content={Astro.generator} />
+		<title>{draft.data.name} | 日本国憲法レビュー</title>
+		<style>
+			ins { background: #e6ffed; text-decoration: none; }
+			del { background: #ffeef0; }
+			.paragraph-diff { margin-bottom: 1em; }
+		</style>
+	</head>
+	<body>
+		<p><a href={`${import.meta.env.BASE_URL}drafts`}>&larr; 改憲案一覧へ戻る</a></p>
+		<h1>{draft.data.name}</h1>
+		<p>提案: {draft.data.proposer} / 公表日: {draft.data.published_at.toISOString().slice(0, 10)}</p>
+		<p>出典: <a href={draft.data.source_url}>{draft.data.source_url}</a></p>
+		<p>最終確認日: {draft.data.retrieved_at.toISOString().slice(0, 10)}</p>
+
+		{rows.map((row) => (
+			<section>
+				<h2>
+					{articleLabel(row.id)}
+					{row.isNew && '(新設)'}
+				</h2>
+				{row.paragraphDiffs.map((pd) => (
+					<div class="paragraph-diff">
+						<p>{pd.no}</p>
+						<p>
+							{pd.parts.map((part) =>
+								part.added ? (
+									<ins>{part.value}</ins>
+								) : part.removed ? (
+									<del>{part.value}</del>
+								) : (
+									<span>{part.value}</span>
+								),
+							)}
+						</p>
+					</div>
+				))}
+			</section>
+		))}
+	</body>
+</html>

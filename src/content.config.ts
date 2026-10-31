@@ -89,4 +89,72 @@ const comments = defineCollection({
   }),
 });
 
-export const collections = { articles, comments };
+// data/drafts/<draft-id>/meta.yaml のスキーマ (docs/design.md 5.2)
+const drafts = defineCollection({
+  loader: glob({
+    pattern: '*/meta.yaml',
+    base: new URL('../data/drafts', import.meta.url),
+    // コレクションの id は draft-id (ディレクトリ名)。data.id と一致させる。
+    generateId: ({ entry, data }) => {
+      const expected = entry.split('/')[0];
+      const actual = typeof data.id === 'string' ? data.id : undefined;
+      if (!actual) {
+        throw new Error(`data/drafts/${entry}: id フィールドが文字列で指定されていません`);
+      }
+      if (actual !== expected) {
+        throw new Error(
+          `data/drafts/${entry}: ディレクトリ名 "${expected}" と id "${actual}" が一致しません。`,
+        );
+      }
+      return actual;
+    },
+  }),
+  schema: z.object({
+    id: z.string(),
+    name: z.string(),
+    proposer: z.string(),
+    published_at: z.coerce.date(),
+    source_url: z.string().url(),
+    retrieved_at: z.coerce.date(),
+  }),
+});
+
+// data/drafts/<draft-id>/art-XXX.yaml のスキーマ (docs/design.md 5.2)
+// 変更・新設された条文のみを、変更後の条文として格納する(現行条文との diff はビルド時に生成)。
+const draftArticles = defineCollection({
+  loader: glob({
+    pattern: '*/art-*.yaml',
+    base: new URL('../data/drafts', import.meta.url),
+    // コレクションの id は "<draft-id>/<article-id>"。data.id (ファイル名) は
+    // 対象の条文 id (data/articles/ 側の id、または art-009-2 のような新設条文の枝番id)。
+    generateId: ({ entry, data }) => {
+      const filename = entry.split('/').pop() ?? entry;
+      const expected = filename.replace(/\.ya?ml$/i, '');
+      const actual = typeof data.id === 'string' ? data.id : undefined;
+      if (!actual) {
+        throw new Error(`data/drafts/${entry}: id フィールドが文字列で指定されていません`);
+      }
+      if (actual !== expected) {
+        throw new Error(
+          `data/drafts/${entry}: ファイル名 "${expected}" と data.id "${actual}" が一致しません。`,
+        );
+      }
+      return entry.replace(/\.ya?ml$/i, '');
+    },
+  }),
+  schema: z.object({
+    id: z.string(),
+    chapter: z.string(),
+    number: z.number(),
+    paragraphs: z.array(
+      z.object({
+        no: z.number(),
+        text: z.string(),
+      }),
+    ),
+    source_url: z.string().url(),
+    retrieved_at: z.coerce.date(),
+  }),
+});
+
+export const collections = { articles, comments, drafts, draftArticles };

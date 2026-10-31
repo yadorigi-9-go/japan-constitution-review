@@ -14,6 +14,7 @@
     "fetch:articles": "python3 scripts/fetch_articles.py"
   },
   "dependencies": {
-    "astro": "^7.4.4"
+    "astro": "^7.4.4",
+    "diff": "^9.0.0"
   }
 }

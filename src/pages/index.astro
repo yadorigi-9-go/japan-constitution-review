@@ -34,6 +34,7 @@ for (const comment of verifiedComments) {
 	<body>
 		<h1>日本国憲法レビュー</h1>
 		<p>準備中です。設計は <a href="https://github.com/yadorigi-9-go/japan-constitution-review/blob/main/docs/design.md">docs/design.md</a> を参照してください。</p>
+		<p><a href={`${import.meta.env.BASE_URL}drafts`}>改憲案一覧</a></p>
 		<ul>
 			{articles.map((article) => {
 				const count = commentCountByArticleId.get(article.id) ?? 0;

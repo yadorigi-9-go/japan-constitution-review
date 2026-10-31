@@ -1,0 +1,30 @@
+---
+import { getCollection } from 'astro:content';
+
+const drafts = (await getCollection('drafts')).sort(
+  (a, b) => a.data.published_at.getTime() - b.data.published_at.getTime(),
+);
+---
+
+<html lang="ja">
+	<head>
+		<meta charset="utf-8" />
+		<link rel="icon" type="image/svg+xml" href={`${import.meta.env.BASE_URL}favicon.svg`} />
+		<link rel="icon" href={`${import.meta.env.BASE_URL}favicon.ico`} />
+		<meta name="viewport" content="width=device-width" />
+		<meta name="generator" content={Astro.generator} />
+		<title>改憲案 | 日本国憲法レビュー</title>
+	</head>
+	<body>
+		<p><a href={import.meta.env.BASE_URL}>&larr; トップへ戻る</a></p>
+		<h1>改憲案</h1>
+		<ul>
+			{drafts.map((draft) => (
+				<li>
+					<a href={`${import.meta.env.BASE_URL}drafts/${draft.id}`}>{draft.data.name}</a>
+					({draft.data.proposer} / {draft.data.published_at.toISOString().slice(0, 10)})
+				</li>
+			))}
+		</ul>
+	</body>
+</html>
