@@ -1,0 +1,21 @@
+id: c-20260722-okuda
+article_ids: [art-098, art-099]
+draft_id: null
+kind: speech
+claim_type: concern
+stance: oppose
+source_type: primary
+speaker:
+  name: "奥田ふみよ"
+  role: "参議院議員"
+  party: "れいわ新選組"
+date: 2026-07-22
+venue: "参議院憲法審査会"
+excerpt: "この者たちは、緊急事態条項創設を糸口に改憲をもくろんでいる。"
+summary: "れいわ新選組の奥田ふみよ参議院議員が、国民投票法改正案(CM規制等の不備)に反対する中で、資金力のある側が緊急事態条項の創設を改憲のきっかけにしようとしていると指摘。緊急事態を理由に選挙を先送りし、国民の意思を無視した政権に権限が集中する懸念を訴えた。"
+summary_source: ai
+source_url: "https://kokkai.ndl.go.jp/txt/122114183X00820260722/53"
+archive_url: ""
+accessed_at: 2026-11-01
+tags: ["緊急事態条項", "国民投票法"]
+verified: true
