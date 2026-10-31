@@ -146,6 +146,14 @@ const draftArticles = defineCollection({
   }),
   schema: z.object({
     id: z.string(),
+    // この条文の変更内容を要約した短いタイトル(Issue風の一覧・見出しに使う)。評価語は使わず、
+    // 何が変わったかを事実として記述する(例: "戦力不保持規定の削除")。
+    title: z.string(),
+    // 他章の新設等により条番号がずれた場合、改番前(現行)の条文idを指定する。
+    // 例: 現行 art-096 が新設章の挿入により draft 側で art-100 に移った場合、
+    //     id: art-100, renamed_from: art-096。diff は renamed_from 側の現行条文と比較する。
+    // 条番号が変わらない通常の改正・新設(枝番)では null のままでよい。
+    renamed_from: z.string().nullable(),
     chapter: z.string(),
     number: z.number(),
     paragraphs: z.array(

@@ -1,7 +1,7 @@
 ---
-import { getCollection, getEntry } from 'astro:content';
-import { diffChars } from 'diff';
+import { getCollection } from 'astro:content';
 import BaseLayout from '../../../layouts/BaseLayout.astro';
+import { articleLabel } from '../../../lib/draftDiff';
 
 export async function getStaticPaths() {
   const drafts = await getCollection('drafts');
@@ -18,33 +18,6 @@ const changedArticles = (await getCollection('draftArticles'))
   .filter((entry) => entry.id.startsWith(`${draft.id}/`))
   .sort((a, b) => a.data.id.localeCompare(b.data.id));
 
-function articleLabel(id: string): string {
-  const m = id.match(/^art-(\d+)(?:-(\d+))?$/);
-  if (!m) return id;
-  const num = Number(m[1]);
-  return m[2] ? `第${num}条の${Number(m[2])}` : `第${num}条`;
-}
-
-const rows = await Promise.all(
-  changedArticles.map(async (entry) => {
-    const current = await getEntry('articles', entry.data.id);
-    const isNew = !current || current.data.kind !== 'article';
-    const oldParagraphs = !isNew && current ? current.data.paragraphs : [];
-    const newParagraphs = entry.data.paragraphs;
-
-    const paragraphNos = [...new Set([...oldParagraphs, ...newParagraphs].map((p) => p.no))].sort(
-      (a, b) => a - b,
-    );
-    const paragraphDiffs = paragraphNos.map((no) => {
-      const oldText = oldParagraphs.find((p) => p.no === no)?.text ?? '';
-      const newText = newParagraphs.find((p) => p.no === no)?.text ?? '';
-      return { no, parts: diffChars(oldText, newText) };
-    });
-
-    return { id: entry.data.id, isNew, paragraphDiffs };
-  }),
-);
-
 const base = import.meta.env.BASE_URL;
 ---
 
@@ -59,32 +32,22 @@ const base = import.meta.env.BASE_URL;
 		<p>最終確認日: {draft.data.retrieved_at.toISOString().slice(0, 10)}</p>
 	</div>
 
-	<div class="space-y-6">
-		{rows.map((row) => (
-			<div class="overflow-hidden rounded-md border" style="border-color: var(--line);">
-				<div class="font-mono flex items-center gap-2 border-b px-3 py-2 text-sm" style="border-color: var(--line); background: var(--paper-raised);">
-					<span class="font-mincho" style="color: var(--ink);">{articleLabel(row.id)}</span>
-					{row.isNew && <span class="tag tag-new">新設</span>}
+	<h2 class="font-mono mb-3 text-sm" style="color: var(--ink-muted);">変更された条文({changedArticles.length})</h2>
+	<ul class="divide-y border-t border-b" style="border-color: var(--line);">
+		{changedArticles.map((entry) => (
+			<li class="flex items-start gap-3 py-3">
+				<span class="mt-1.5 inline-block h-3 w-3 shrink-0 rounded-full" style="background: var(--seal);" aria-hidden="true" />
+				<div>
+					<a href={`${base}drafts/${draft.id}/${entry.data.id}`} class="no-underline hover:underline">
+						<span class="font-mincho text-lg" style="color: var(--ink);">{entry.data.title}</span>
+					</a>
+					<p class="font-mono mt-1 text-xs" style="color: var(--ink-muted);">
+						{entry.data.renamed_from && entry.data.renamed_from !== entry.data.id
+							? `${articleLabel(entry.data.renamed_from)} → ${articleLabel(entry.data.id)}`
+							: articleLabel(entry.data.id)}
+					</p>
 				</div>
-				<div class="font-mono px-3 py-3 text-sm leading-relaxed">
-					{row.paragraphDiffs.map((pd) => (
-						<div class="flex gap-3 py-1">
-							<span class="shrink-0 text-right" style="width: 1.5rem; color: var(--ink-muted);">{pd.no}</span>
-							<p style="color: var(--ink);">
-								{pd.parts.map((part) =>
-									part.added ? (
-										<ins>{part.value}</ins>
-									) : part.removed ? (
-										<del>{part.value}</del>
-									) : (
-										<span>{part.value}</span>
-									),
-								)}
-							</p>
-						</div>
-					))}
-				</div>
-			</div>
+			</li>
 		))}
-	</div>
+	</ul>
 </BaseLayout>

@@ -1,0 +1,62 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import { articleLabel, computeDraftArticleDiff } from '../../../lib/draftDiff';
+
+export async function getStaticPaths() {
+  const drafts = await getCollection('drafts');
+  const draftArticles = await getCollection('draftArticles');
+  const draftById = new Map(drafts.map((draft) => [draft.id, draft]));
+
+  return draftArticles.map((entry) => {
+    const [draftId] = entry.id.split('/');
+    return {
+      params: { draftId, articleId: entry.data.id },
+      props: { draft: draftById.get(draftId)!, entry },
+    };
+  });
+}
+
+const { draft, entry } = Astro.props;
+const row = await computeDraftArticleDiff(entry);
+const base = import.meta.env.BASE_URL;
+---
+
+<BaseLayout title={`${row.title} | ${draft.data.name} | 日本国憲法レビュー`}>
+	<p class="font-mono mb-4 text-sm">
+		<a href={`${base}drafts/${draft.id}`}>&larr; {draft.data.name}</a>
+	</p>
+
+	<div class="overflow-hidden rounded-md border" style="border-color: var(--line);">
+		<div class="border-b px-4 py-3" style="border-color: var(--line); background: var(--paper-raised);">
+			<h1 class="font-mincho text-lg" style="color: var(--ink);">{row.title}</h1>
+			<p class="font-mono mt-1 flex items-center gap-2 text-sm" style="color: var(--ink-muted);">
+				{row.isRenamed && row.renamedFrom ? `${articleLabel(row.renamedFrom)} → ${articleLabel(row.id)}` : articleLabel(row.id)}
+				{row.isNew && <span class="tag tag-new">新設</span>}
+				{row.isRenamed && <span class="tag">改番</span>}
+			</p>
+		</div>
+		<div class="font-mono px-3 py-3 text-sm leading-relaxed">
+			{row.paragraphDiffs.map((pd) => (
+				<div class="flex gap-3 py-1">
+					<span class="shrink-0 text-right" style="width: 1.5rem; color: var(--ink-muted);">{pd.no}</span>
+					<p style="color: var(--ink);">
+						{pd.parts.map((part) =>
+							part.added ? (
+								<ins>{part.value}</ins>
+							) : part.removed ? (
+								<del>{part.value}</del>
+							) : (
+								<span>{part.value}</span>
+							),
+						)}
+					</p>
+				</div>
+			))}
+		</div>
+	</div>
+
+	<p class="font-mono mt-4 text-xs" style="color: var(--ink-muted);">
+		出典: <a href={entry.data.source_url}>{entry.data.source_url}</a> / 最終確認日: {entry.data.retrieved_at.toISOString().slice(0, 10)}
+	</p>
+</BaseLayout>
