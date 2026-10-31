@@ -8,7 +8,7 @@
   },
   "scripts": {
     "dev": "astro dev",
-    "build": "astro build",
+    "build": "astro build && pagefind --site dist",
     "preview": "astro preview",
     "astro": "astro",
     "fetch:articles": "python3 scripts/fetch_articles.py"
@@ -16,5 +16,8 @@
   "dependencies": {
     "astro": "^7.4.4",
     "diff": "^9.0.0"
+  },
+  "devDependencies": {
+    "pagefind": "^1.5.2"
   }
 }
