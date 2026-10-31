@@ -1,0 +1,20 @@
+id: art-086
+title: "補正予算・暫定予算・複数年度予算の規定を新設"
+is_new: false
+renamed_from: null
+chapter: 第七章
+number: 86
+paragraphs:
+  - no: 1
+    text: "内閣は、毎会計年度の予算案を作成し、国会に提出して、その審議を受け、議決を経なければならない。"
+  - no: 2
+    based_on: null
+    text: "内閣は、毎会計年度中において、予算を補正するための予算案を提出することができる。"
+  - no: 3
+    based_on: null
+    text: "内閣は、当該会計年度開始前に第一項の議決を得られる見込みがないと認めるときは、暫定期間に係る予算案を提出しなければならない。"
+  - no: 4
+    based_on: null
+    text: "毎会計年度の予算は、法律の定めるところにより、国会の議決を経て、翌年度以降の年度においても支出することができる。"
+source_url: "https://storage.jimin.jp/pdf/news/policy/130250_1.pdf"
+retrieved_at: 2026-11-01

@@ -1,0 +1,18 @@
+id: art-090
+title: "決算の国会提出を「報告」から「承認」を要する扱いに変更、検査報告の予算反映を新設"
+is_new: false
+renamed_from: null
+chapter: 第七章
+number: 90
+paragraphs:
+  - no: 1
+    based_on: 1
+    text: "内閣は、国の収入支出の決算について、全て毎年会計検査院の検査を受け、法律の定めるところにより、次の年度にその検査報告とともに両議院に提出し、その承認を受けなければならない。"
+  - no: 2
+    based_on: 2
+    text: "会計検査院の組織及び権限は、法律で定める。"
+  - no: 3
+    based_on: null
+    text: "内閣は、第一項の検査報告の内容を予算案に反映させ、国会に対し、その結果について報告しなければならない。"
+source_url: "https://storage.jimin.jp/pdf/news/policy/130250_1.pdf"
+retrieved_at: 2026-11-01
