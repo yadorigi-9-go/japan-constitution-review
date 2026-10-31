@@ -1,5 +1,5 @@
 ---
-import { getCollection, getEntry } from 'astro:content';
+import { getCollection, getEntry, type CollectionEntry } from 'astro:content';
 import BaseLayout from '../../../../layouts/BaseLayout.astro';
 import { articleLabel } from '../../../../lib/draftDiff';
 
@@ -17,13 +17,21 @@ export async function getStaticPaths() {
   });
 }
 
+interface Props {
+  draft: CollectionEntry<'drafts'>;
+  entry: CollectionEntry<'draftDeletions'>;
+}
+
 const { draft, entry } = Astro.props;
 const current = await getEntry('articles', entry.data.id);
 const paragraphs = current && (current.data.kind === 'article' || current.data.kind === 'preamble') ? current.data.paragraphs : [];
 const base = import.meta.env.BASE_URL;
 ---
 
-<BaseLayout title={`${entry.data.title} | ${draft.data.name} | 日本国憲法レビュー`}>
+<BaseLayout
+	title={`${entry.data.title} | ${draft.data.name} | 日本国憲法レビュー`}
+	description={`${draft.data.name}により削除される${articleLabel(entry.data.id)}(${entry.data.title})。`}
+>
 	<p class="font-mono mb-4 text-sm">
 		<a href={`${base}drafts/${draft.id}`}>&larr; {draft.data.name}</a>
 	</p>

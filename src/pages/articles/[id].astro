@@ -1,5 +1,5 @@
 ---
-import { getCollection } from 'astro:content';
+import { getCollection, type CollectionEntry } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 
 export async function getStaticPaths() {
@@ -10,11 +10,16 @@ export async function getStaticPaths() {
   }));
 }
 
+interface Props {
+  article: CollectionEntry<'articles'>;
+}
+
 const { article } = Astro.props;
 const { kind, paragraphs, source_url, retrieved_at } = article.data;
 const lastChecked = retrieved_at.toISOString().slice(0, 10);
 const heading = kind === 'preamble' ? '前文' : `日本国憲法 第${article.data.number}条`;
 const pageTitle = kind === 'preamble' ? '前文' : `第${article.data.number}条`;
+const description = `${heading}の本文。${paragraphs[0]?.text.slice(0, 80) ?? ''}…`;
 
 // verified: false のコメントは公開しない (docs/design.md 10)
 const comments = (await getCollection('comments')).filter(
@@ -26,7 +31,7 @@ const claimTypeLabel = { fact: '事実', interpretation: '解釈', concern: '懸
 const base = import.meta.env.BASE_URL;
 ---
 
-<BaseLayout title={`${pageTitle} | 日本国憲法レビュー`}>
+<BaseLayout title={`${pageTitle} | 日本国憲法レビュー`} description={description}>
 	<p class="font-mono mb-4 text-sm">
 		<a href={base}>&larr; 条文一覧</a>
 	</p>
