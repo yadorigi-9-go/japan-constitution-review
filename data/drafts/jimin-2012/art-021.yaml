@@ -8,8 +8,10 @@ paragraphs:
   - no: 1
     text: "集会、結社及び言論、出版その他一切の表現の自由は、保障する。"
   - no: 2
+    based_on: null
     text: "前項の規定にかかわらず、公益及び公の秩序を害することを目的とした活動を行い、並びにそれを目的として結社をすることは、認められない。"
   - no: 3
+    based_on: 2
     text: "検閲は、してはならない。通信の秘密は、侵してはならない。"
 source_url: "https://storage.jimin.jp/pdf/news/policy/130250_1.pdf"
 retrieved_at: 2026-11-01

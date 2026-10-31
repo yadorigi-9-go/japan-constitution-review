@@ -20,12 +20,22 @@ export async function computeDraftArticleDiff(entry: CollectionEntry<'draftArtic
   const oldParagraphs = !isNew && current && current.data.kind === 'article' ? current.data.paragraphs : [];
   const newParagraphs = entry.data.paragraphs;
 
-  const paragraphNos = [...new Set([...oldParagraphs, ...newParagraphs].map((p) => p.no))].sort((a, b) => a - b);
-  const paragraphDiffs = paragraphNos.map((no) => {
-    const oldText = oldParagraphs.find((p) => p.no === no)?.text ?? '';
-    const newText = newParagraphs.find((p) => p.no === no)?.text ?? '';
-    return { no, parts: diffChars(oldText, newText) };
+  // 各新項の based_on (省略時は自分の no) が示す現行項とだけ比較する。項の挿入・
+  // 並べ替えがあっても、項番号のずれで無関係な項同士を比較しないようにするため。
+  const usedOldNos = new Set(
+    newParagraphs.map((p) => (p.based_on === undefined ? p.no : p.based_on)).filter((n): n is number => n !== null),
+  );
+  const paragraphDiffs = newParagraphs.map((p) => {
+    const basedOn = p.based_on === undefined ? p.no : p.based_on;
+    const oldText = basedOn !== null ? (oldParagraphs.find((op) => op.no === basedOn)?.text ?? '') : '';
+    return { no: p.no, parts: diffChars(oldText, p.text) };
   });
+  // 新条文側のどの項からも参照されなかった現行項は、純粋な削除として表示する。
+  for (const op of oldParagraphs) {
+    if (!usedOldNos.has(op.no)) {
+      paragraphDiffs.push({ no: op.no, parts: diffChars(op.text, '') });
+    }
+  }
 
   return {
     id: entry.data.id,
