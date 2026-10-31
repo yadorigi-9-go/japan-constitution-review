@@ -1,0 +1,15 @@
+id: art-102
+title: "国民の憲法尊重義務を新設する一方、天皇・摂政を憲法尊重擁護義務の対象から除外(現行第99条から改番)"
+is_new: false
+renamed_from: art-099
+chapter: 第十一章
+number: 102
+paragraphs:
+  - no: 1
+    based_on: null
+    text: "全て国民は、この憲法を尊重しなければならない。"
+  - no: 2
+    based_on: 1
+    text: "国会議員、国務大臣、裁判官その他の公務員は、この憲法を擁護する義務を負う。"
+source_url: "https://storage.jimin.jp/pdf/news/policy/130250_1.pdf"
+retrieved_at: 2026-11-01
