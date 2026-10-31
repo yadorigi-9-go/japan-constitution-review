@@ -48,7 +48,7 @@ const base = import.meta.env.BASE_URL;
 	<ul class="divide-y border-t border-b" style="border-color: var(--line);">
 		{changedArticles.map((entry) => (
 			<li class="flex items-start gap-3 py-3">
-				<span class="mt-1.5 inline-block h-3 w-3 shrink-0 rounded-full" style="background: var(--seal);" aria-hidden="true" />
+				<span class="mt-1.5 inline-block h-3 w-3 shrink-0 rounded-full" style="background: var(--danger);" aria-hidden="true" />
 				<div>
 					<a href={`${base}drafts/${draft.id}/${entry.data.id}`} class="no-underline hover:underline">
 						<span class="font-mincho text-lg" style="color: var(--ink);">{entry.data.title}</span>
