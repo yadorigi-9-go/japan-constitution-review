@@ -21,8 +21,19 @@ def fetch_root() -> ET.Element:
     return ET.fromstring(data)
 
 
-def sentence_text(paragraph_sentence: ET.Element) -> str:
-    return "".join(s.text or "" for s in paragraph_sentence.findall("Sentence"))
+def sentence_text(sentence_parent: ET.Element) -> str:
+    return "".join(s.text or "" for s in sentence_parent.findall("Sentence"))
+
+
+def item_text(item: ET.Element) -> str:
+    # Item は ItemTitle(「一」等) + ItemSentence に加え、入れ子の Item を持つことがある。
+    title_el = item.find("ItemTitle")
+    title = title_el.text or "" if title_el is not None else ""
+    sentence_el = item.find("ItemSentence")
+    text = title + (sentence_text(sentence_el) if sentence_el is not None else "")
+    for sub_item in item.findall("Item"):
+        text += item_text(sub_item)
+    return text
 
 
 def paragraphs_from(paragraph_elems: list[ET.Element]) -> list[dict]:
@@ -30,7 +41,10 @@ def paragraphs_from(paragraph_elems: list[ET.Element]) -> list[dict]:
     for paragraph in paragraph_elems:
         no = int(paragraph.get("Num"))
         sentence_el = paragraph.find("ParagraphSentence")
-        text = sentence_text(sentence_el)
+        text = sentence_text(sentence_el) if sentence_el is not None else ""
+        # 号(Item)による列挙がある条文(第七条・第七十三条等)は、列挙項目も本文に含める。
+        for item in paragraph.findall("Item"):
+            text += item_text(item)
         paragraphs.append({"no": no, "text": text})
     return paragraphs
 
