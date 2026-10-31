@@ -56,4 +56,37 @@ const articles = defineCollection({
   ]),
 });
 
-export const collections = { articles };
+// data/comments/<article-id>/<comment-id>.yaml のスキーマ (docs/design.md 5.3)
+// verified: false のコメントは公開しない(docs/design.md 10)。読み込み側でフィルタする。
+const comments = defineCollection({
+  loader: glob({
+    pattern: '**/*.yaml',
+    base: new URL('../data/comments', import.meta.url),
+  }),
+  schema: z.object({
+    id: z.string(),
+    article_ids: z.array(z.string()),
+    draft_id: z.string().nullable(),
+    kind: z.enum(['speech', 'review', 'embed']),
+    claim_type: z.enum(['fact', 'interpretation', 'concern', 'quote']),
+    stance: z.enum(['support', 'oppose', 'neutral']),
+    source_type: z.enum(['primary', 'news', 'organization']),
+    speaker: z.object({
+      name: z.string(),
+      role: z.string(),
+      party: z.string(),
+    }),
+    date: z.coerce.date(),
+    venue: z.string(),
+    excerpt: z.string(),
+    summary: z.string(),
+    // 未確認の場合は空欄にする運用のため、URL形式を強制しない。
+    source_url: z.string(),
+    archive_url: z.string(),
+    accessed_at: z.coerce.date(),
+    tags: z.array(z.string()),
+    verified: z.boolean(),
+  }),
+});
+
+export const collections = { articles, comments };

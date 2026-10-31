@@ -11,6 +11,15 @@ const articles = (await getCollection('articles')).sort((a, b) => {
   }
   return 0;
 });
+
+// verified: false のコメントは件数に数えない (docs/design.md 10)
+const verifiedComments = (await getCollection('comments')).filter((comment) => comment.data.verified);
+const commentCountByArticleId = new Map<string, number>();
+for (const comment of verifiedComments) {
+  for (const articleId of comment.data.article_ids) {
+    commentCountByArticleId.set(articleId, (commentCountByArticleId.get(articleId) ?? 0) + 1);
+  }
+}
 ---
 
 <html lang="ja">
@@ -26,13 +35,17 @@ const articles = (await getCollection('articles')).sort((a, b) => {
 		<h1>日本国憲法レビュー</h1>
 		<p>準備中です。設計は <a href="https://github.com/yadorigi-9-go/japan-constitution-review/blob/main/docs/design.md">docs/design.md</a> を参照してください。</p>
 		<ul>
-			{articles.map((article) => (
-				<li>
-					<a href={`${import.meta.env.BASE_URL}articles/${article.id}`}>
-						{article.data.kind === 'preamble' ? '前文' : `第${article.data.number}条`}
-					</a>
-				</li>
-			))}
+			{articles.map((article) => {
+				const count = commentCountByArticleId.get(article.id) ?? 0;
+				return (
+					<li>
+						<a href={`${import.meta.env.BASE_URL}articles/${article.id}`}>
+							{article.data.kind === 'preamble' ? '前文' : `第${article.data.number}条`}
+						</a>
+						{count > 0 && ` (コメント${count}件)`}
+					</li>
+				);
+			})}
 		</ul>
 	</body>
 </html>

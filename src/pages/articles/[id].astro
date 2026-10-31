@@ -14,6 +14,14 @@ const { kind, paragraphs, source_url, retrieved_at } = article.data;
 const lastChecked = retrieved_at.toISOString().slice(0, 10);
 const heading = kind === 'preamble' ? '前文' : `日本国憲法 第${article.data.number}条`;
 const pageTitle = kind === 'preamble' ? '前文' : `第${article.data.number}条`;
+
+// verified: false のコメントは公開しない (docs/design.md 10)
+const comments = (await getCollection('comments')).filter(
+  (comment) => comment.data.verified && comment.data.article_ids.includes(article.id),
+);
+
+const stanceLabel = { support: '賛成', oppose: '反対', neutral: '中立' } as const;
+const claimTypeLabel = { fact: '事実', interpretation: '解釈', concern: '懸念・予測', quote: '引用' } as const;
 ---
 
 <html lang="ja">
@@ -40,6 +48,32 @@ const pageTitle = kind === 'preamble' ? '前文' : `第${article.data.number}条
 					<li value={paragraph.no}>{paragraph.text}</li>
 				))}
 			</ol>
+		)}
+		{comments.length > 0 && (
+			<section>
+				<h2>この条文についてのコメント</h2>
+				<ul>
+					{comments.map((comment) => (
+						<li>
+							<p>
+								<strong>{comment.data.speaker.name}</strong>
+								({comment.data.speaker.role}・{comment.data.speaker.party}) —
+								{stanceLabel[comment.data.stance]} / {claimTypeLabel[comment.data.claim_type]}
+							</p>
+							<blockquote>{comment.data.excerpt}</blockquote>
+							<p>{comment.data.summary}</p>
+							<p>
+								{comment.data.venue}({comment.data.date.toISOString().slice(0, 10)})
+								{comment.data.source_url && (
+									<>
+										{' '}/ 出典: <a href={comment.data.source_url}>{comment.data.source_url}</a>
+									</>
+								)}
+							</p>
+						</li>
+					))}
+				</ul>
+			</section>
 		)}
 		<footer>
 			<p>出典: <a href={source_url}>{source_url}</a></p>
