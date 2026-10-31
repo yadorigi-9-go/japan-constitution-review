@@ -125,7 +125,8 @@ const drafts = defineCollection({
 // 変更・新設された条文のみを、変更後の条文として格納する(現行条文との diff はビルド時に生成)。
 const draftArticles = defineCollection({
   loader: glob({
-    pattern: '*/art-*.yaml',
+    // art-XXX.yaml (条文) のほか、前文の改正案は preamble.yaml として扱う。
+    pattern: '*/{art-*,preamble}.yaml',
     base: new URL('../data/drafts', import.meta.url),
     // コレクションの id は "<draft-id>/<article-id>"。data.id (ファイル名) は
     // 対象の条文 id (data/articles/ 側の id、または art-009-2 のような新設条文の枝番id)。
@@ -161,8 +162,9 @@ const draftArticles = defineCollection({
     // is_new: false で、条番号が変わらない通常の改正では null のままでよい。
     // is_new: true のときは無視される。
     renamed_from: z.string().nullable(),
-    chapter: z.string(),
-    number: z.number(),
+    // 前文(id: "preamble")は章・条文番号を持たないため省略する(5.1 の前文スキーマに合わせる)。
+    chapter: z.string().optional(),
+    number: z.number().optional(),
     paragraphs: z.array(
       z.object({
         no: z.number(),
@@ -179,4 +181,37 @@ const draftArticles = defineCollection({
   }),
 });
 
-export const collections = { articles, comments, drafts, draftArticles };
+// data/drafts/<draft-id>/del-<article-id>.yaml のスキーマ (docs/design.md 5.2)
+// 草案で現行条文がまるごと削除される場合に使う(例: 現行第97条「基本的人権の永久性」の削除)。
+// draftArticles と違い、削除後の新しい条文本文は存在しないため、paragraphs は持たない。
+// 画面では、id が指す現行条文(data/articles/)の本文全体を取消線付きで表示する。
+const draftDeletions = defineCollection({
+  loader: glob({
+    pattern: '*/del-*.yaml',
+    base: new URL('../data/drafts', import.meta.url),
+    // コレクションの id は "<draft-id>/del-<article-id>"。data.id は削除される現行条文の id。
+    generateId: ({ entry, data }) => {
+      const filename = entry.split('/').pop() ?? entry;
+      const expected = filename.replace(/^del-/, '').replace(/\.ya?ml$/i, '');
+      const actual = typeof data.id === 'string' ? data.id : undefined;
+      if (!actual) {
+        throw new Error(`data/drafts/${entry}: id フィールドが文字列で指定されていません`);
+      }
+      if (actual !== expected) {
+        throw new Error(
+          `data/drafts/${entry}: ファイル名 "del-${expected}" と data.id "${actual}" が一致しません。`,
+        );
+      }
+      return entry.replace(/\.ya?ml$/i, '');
+    },
+  }),
+  schema: z.object({
+    id: z.string(),
+    // 削除内容を要約した短いタイトル(例: "基本的人権の永久性規定の削除")。
+    title: z.string(),
+    source_url: z.string().url(),
+    retrieved_at: z.coerce.date(),
+  }),
+});
+
+export const collections = { articles, comments, drafts, draftArticles, draftDeletions };

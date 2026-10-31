@@ -2,6 +2,7 @@ import { getEntry, type CollectionEntry } from 'astro:content';
 import { diffChars } from 'diff';
 
 export function articleLabel(id: string): string {
+  if (id === 'preamble') return '前文';
   const m = id.match(/^art-(\d+)(?:-(\d+))?$/);
   if (!m) return id;
   const num = Number(m[1]);
@@ -16,8 +17,11 @@ export async function computeDraftArticleDiff(entry: CollectionEntry<'draftArtic
   const lookupId = entry.data.is_new ? null : (entry.data.renamed_from ?? entry.data.id);
   const current = lookupId ? await getEntry('articles', lookupId) : undefined;
   const isRenamed = Boolean(entry.data.renamed_from) && entry.data.renamed_from !== entry.data.id;
-  const isNew = entry.data.is_new || !current || current.data.kind !== 'article';
-  const oldParagraphs = !isNew && current && current.data.kind === 'article' ? current.data.paragraphs : [];
+  // 通常の条文(kind: article)のほか、前文(kind: preamble)も比較対象になる。どちらも
+  // paragraphs の形が同じなので、同じロジックで diff できる。
+  const isComparable = Boolean(current) && (current!.data.kind === 'article' || current!.data.kind === 'preamble');
+  const isNew = entry.data.is_new || !isComparable;
+  const oldParagraphs = !isNew && isComparable ? current!.data.paragraphs : [];
   const newParagraphs = entry.data.paragraphs;
 
   // 各新項の based_on (省略時は自分の no) が示す現行項とだけ比較する。項の挿入・

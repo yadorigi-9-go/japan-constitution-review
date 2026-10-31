@@ -18,6 +18,11 @@ const changedArticles = (await getCollection('draftArticles'))
   .filter((entry) => entry.id.startsWith(`${draft.id}/`))
   .sort((a, b) => a.data.id.localeCompare(b.data.id));
 
+// 条文ごと削除される項目 (id が "<draftId>/del-art-XXX" になっている)
+const deletedArticles = (await getCollection('draftDeletions'))
+  .filter((entry) => entry.id.startsWith(`${draft.id}/`))
+  .sort((a, b) => a.data.id.localeCompare(b.data.id));
+
 const base = import.meta.env.BASE_URL;
 ---
 
@@ -32,7 +37,7 @@ const base = import.meta.env.BASE_URL;
 		<p>最終確認日: {draft.data.retrieved_at.toISOString().slice(0, 10)}</p>
 	</div>
 
-	<h2 class="font-mono mb-3 text-sm" style="color: var(--ink-muted);">変更された条文({changedArticles.length})</h2>
+	<h2 class="font-mono mb-3 text-sm" style="color: var(--ink-muted);">変更された条文({changedArticles.length + deletedArticles.length})</h2>
 	<ul class="divide-y border-t border-b" style="border-color: var(--line);">
 		{changedArticles.map((entry) => (
 			<li class="flex items-start gap-3 py-3">
@@ -45,6 +50,20 @@ const base = import.meta.env.BASE_URL;
 						{entry.data.renamed_from && entry.data.renamed_from !== entry.data.id
 							? `${articleLabel(entry.data.renamed_from)} → ${articleLabel(entry.data.id)}`
 							: articleLabel(entry.data.id)}
+					</p>
+				</div>
+			</li>
+		))}
+		{deletedArticles.map((entry) => (
+			<li class="flex items-start gap-3 py-3">
+				<span class="mt-1.5 inline-block h-3 w-3 shrink-0 rounded-full" style="background: var(--ink-muted);" aria-hidden="true" />
+				<div>
+					<a href={`${base}drafts/${draft.id}/deleted/${entry.data.id}`} class="no-underline hover:underline">
+						<span class="font-mincho text-lg" style="color: var(--ink);">{entry.data.title}</span>
+					</a>
+					<p class="font-mono mt-1 text-xs" style="color: var(--ink-muted);">
+						{articleLabel(entry.data.id)}
+						<span class="tag">削除</span>
 					</p>
 				</div>
 			</li>

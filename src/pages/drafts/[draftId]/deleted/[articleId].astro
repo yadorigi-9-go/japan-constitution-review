@@ -1,0 +1,52 @@
+---
+import { getCollection, getEntry } from 'astro:content';
+import BaseLayout from '../../../../layouts/BaseLayout.astro';
+import { articleLabel } from '../../../../lib/draftDiff';
+
+export async function getStaticPaths() {
+  const drafts = await getCollection('drafts');
+  const draftDeletions = await getCollection('draftDeletions');
+  const draftById = new Map(drafts.map((draft) => [draft.id, draft]));
+
+  return draftDeletions.map((entry) => {
+    const [draftId] = entry.id.split('/');
+    return {
+      params: { draftId, articleId: entry.data.id },
+      props: { draft: draftById.get(draftId)!, entry },
+    };
+  });
+}
+
+const { draft, entry } = Astro.props;
+const current = await getEntry('articles', entry.data.id);
+const paragraphs = current && (current.data.kind === 'article' || current.data.kind === 'preamble') ? current.data.paragraphs : [];
+const base = import.meta.env.BASE_URL;
+---
+
+<BaseLayout title={`${entry.data.title} | ${draft.data.name} | 日本国憲法レビュー`}>
+	<p class="font-mono mb-4 text-sm">
+		<a href={`${base}drafts/${draft.id}`}>&larr; {draft.data.name}</a>
+	</p>
+
+	<div class="overflow-hidden rounded-md border" style="border-color: var(--line);">
+		<div class="border-b px-4 py-3" style="border-color: var(--line); background: var(--paper-raised);">
+			<h1 class="font-mincho text-lg" style="color: var(--ink);">{entry.data.title}</h1>
+			<p class="font-mono mt-1 flex items-center gap-2 text-sm" style="color: var(--ink-muted);">
+				{articleLabel(entry.data.id)}
+				<span class="tag">削除</span>
+			</p>
+		</div>
+		<div class="font-mono px-3 py-3 text-sm leading-relaxed">
+			{paragraphs.map((p) => (
+				<div class="flex gap-3 py-1">
+					<span class="shrink-0 text-right" style="width: 1.5rem; color: var(--ink-muted);">{p.no}</span>
+					<p style="color: var(--ink);"><del>{p.text}</del></p>
+				</div>
+			))}
+		</div>
+	</div>
+
+	<p class="font-mono mt-4 text-xs" style="color: var(--ink-muted);">
+		出典: <a href={entry.data.source_url}>{entry.data.source_url}</a> / 最終確認日: {entry.data.retrieved_at.toISOString().slice(0, 10)}
+	</p>
+</BaseLayout>
