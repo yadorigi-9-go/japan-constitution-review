@@ -107,7 +107,7 @@ flowchart LR
 ### 5.1 条文 `data/articles/art-009.yaml`
 
 ```yaml
-id: art-9
+id: art-009
 chapter: 第二章
 number: 9
 paragraphs:
@@ -116,6 +116,8 @@ paragraphs:
 source_url: "(e-Gov の該当ページ)"
 retrieved_at: 2026-10-31
 ```
+
+`id` はファイル名(拡張子を除いた部分)と完全一致させる。条文番号は3桁にゼロ埋めする(`art-009`)。文字列として並べ替えたときに数値順と一致させるため。
 
 ### 5.2 改憲案 `data/drafts/<draft-id>/`
 
@@ -126,7 +128,7 @@ data/drafts/<draft-id>/
 ```
 
 - 現行条文との差分は、ビルド時に生成する(差分自体は保存しない)。
-- 新設条文は `art-<番号>-2` のように枝番で表す。
+- 新設条文は `art-<番号を3桁0埋め>-2` のように枝番で表す(例: `art-009-2`)。
 
 ### 5.3 コメント `data/comments/art-009/<id>.yaml`
 
@@ -134,7 +136,7 @@ data/drafts/<draft-id>/
 
 ```yaml
 id: c-0001
-article_ids: [art-9]
+article_ids: [art-009]
 draft_id: null              # 改憲案へのコメントなら draft-id
 kind: speech                # speech | review | embed
 claim_type: quote           # fact | interpretation | concern | quote
