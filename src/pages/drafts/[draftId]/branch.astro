@@ -1,0 +1,158 @@
+---
+import { getCollection, type CollectionEntry } from 'astro:content';
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import { articleLabel } from '../../../lib/draftDiff';
+
+export async function getStaticPaths() {
+  const drafts = await getCollection('drafts');
+  return drafts.map((draft) => ({
+    params: { draftId: draft.id },
+    props: { draft },
+  }));
+}
+
+interface Props {
+  draft: CollectionEntry<'drafts'>;
+}
+
+const { draft } = Astro.props;
+const base = import.meta.env.BASE_URL;
+
+// 「このブランチ(改憲案)がマージされたら憲法はどうなるか」を条文単位で一覧表示する。
+// 改憲案一覧(/drafts/<id>)は変更された条文だけを「Files changed」風に見せるが、
+// こちらは変更の有無を問わず、前文〜最終条まで通しで並べる(条文一覧トップと同じ構成)。
+interface BranchRow {
+  sortKey: number;
+  isPreamble: boolean;
+  chapter: string | null;
+  label: string;
+  idForDisplay: string;
+  href: string;
+  status: 'changed' | 'new' | 'renamed' | 'deleted' | null;
+}
+
+const articles = await getCollection('articles');
+const articleById = new Map(articles.map((a) => [a.id, a]));
+
+const draftArticles = (await getCollection('draftArticles')).filter((entry) => entry.id.startsWith(`${draft.id}/`));
+const draftDeletions = (await getCollection('draftDeletions')).filter((entry) => entry.id.startsWith(`${draft.id}/`));
+
+// 改憲案によって「現行の番号には存在しなくなる」現行条文の id
+// (改番元・is_new で番号が再利用されたもの・削除されたもの)。
+const supersededIds = new Set<string>();
+for (const entry of draftArticles) {
+  supersededIds.add(entry.data.id);
+  if (entry.data.renamed_from) supersededIds.add(entry.data.renamed_from);
+}
+for (const entry of draftDeletions) {
+  supersededIds.add(entry.data.id);
+}
+
+const rows: BranchRow[] = [];
+
+for (const entry of draftArticles) {
+  const isPreamble = entry.data.id === 'preamble';
+  rows.push({
+    sortKey: isPreamble ? -1 : entry.data.number ?? 0,
+    isPreamble,
+    chapter: entry.data.chapter ?? null,
+    label: articleLabel(entry.data.id),
+    idForDisplay: entry.data.id,
+    href: `${base}drafts/${draft.id}/${entry.data.id}`,
+    status: entry.data.is_new ? 'new' : entry.data.renamed_from ? 'renamed' : 'changed',
+  });
+}
+
+for (const entry of draftDeletions) {
+  const current = articleById.get(entry.data.id);
+  rows.push({
+    sortKey: current?.data.kind === 'article' ? current.data.number : -1,
+    isPreamble: false,
+    chapter: current?.data.kind === 'article' ? current.data.chapter : null,
+    label: articleLabel(entry.data.id),
+    idForDisplay: entry.data.id,
+    href: `${base}drafts/${draft.id}/deleted/${entry.data.id}`,
+    status: 'deleted',
+  });
+}
+
+for (const article of articles) {
+  if (supersededIds.has(article.id)) continue;
+  const isPreamble = article.data.kind === 'preamble';
+  rows.push({
+    sortKey: isPreamble ? -1 : article.data.number,
+    isPreamble,
+    chapter: article.data.kind === 'article' ? article.data.chapter : null,
+    label: articleLabel(article.id),
+    idForDisplay: article.id,
+    href: `${base}articles/${article.id}`,
+    status: null,
+  });
+}
+
+rows.sort((a, b) => a.sortKey - b.sortKey);
+
+type ChapterGroup = { chapter: string | null; items: BranchRow[] };
+const groups: ChapterGroup[] = [];
+for (const row of rows) {
+  const last = groups[groups.length - 1];
+  // 削除された条文は改正後の章番号体系に対応する位置を持たないため、
+  // 章の見出しは変えずに直前のグループへそのまま含める。
+  if (row.status === 'deleted') {
+    if (last) {
+      last.items.push(row);
+    } else {
+      groups.push({ chapter: null, items: [row] });
+    }
+    continue;
+  }
+  const chapter = row.isPreamble ? null : row.chapter;
+  if (last && last.chapter === chapter) {
+    last.items.push(row);
+  } else {
+    groups.push({ chapter, items: [row] });
+  }
+}
+
+const statusLabel = { changed: '変更', new: '新設', renamed: '改番', deleted: '削除' } as const;
+---
+
+<BaseLayout
+	title={`${draft.data.name}(ブランチ) | 日本国憲法レビュー`}
+	description={`${draft.data.name}が成立した場合の日本国憲法の全条文一覧。`}
+>
+	<p class="font-mono mb-4 text-sm">
+		<a href={`${base}drafts/${draft.id}`}>&larr; {draft.data.name}</a>
+	</p>
+	<h1 class="font-mincho mb-2 text-xl" style="color: var(--ink);">{draft.data.name}<span class="font-mono ml-2 text-sm" style="color: var(--ink-muted);">(ブランチ)</span></h1>
+	<p class="font-mono mb-6 text-sm" style="color: var(--ink-muted);">
+		この改憲案が成立した場合の条文を、前文から通しで表示します。変更のない条文は現行の本文のままです。
+	</p>
+
+	<div class="border-t" style="border-color: var(--line);">
+		{groups.map((group) => (
+			<div>
+				{group.chapter && (
+					<p class="font-mono mt-4 px-1 py-1 text-xs tracking-wide" style="color: var(--ink-muted);">
+						{group.chapter}
+					</p>
+				)}
+				<ul class="divide-y" style="border-color: var(--line);">
+					{group.items.map((row) => (
+						<li class="border-b" style="border-color: var(--line);">
+							<a href={row.href} class="flex items-baseline gap-3 px-1 py-2 no-underline hover:underline">
+								<span class="font-mono text-xs" style="color: var(--ink-muted);">{row.idForDisplay}</span>
+								<span class="font-mincho" style="color: var(--ink);">{row.label}</span>
+								{row.status && (
+									<span class={`tag font-mono ml-auto ${row.status === 'new' ? 'tag-new' : ''}`}>
+										{statusLabel[row.status]}
+									</span>
+								)}
+							</a>
+						</li>
+					))}
+				</ul>
+			</div>
+		))}
+	</div>
+</BaseLayout>

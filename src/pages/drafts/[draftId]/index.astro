@@ -38,11 +38,17 @@ const base = import.meta.env.BASE_URL;
 		<a href={`${base}drafts`}>&larr; 改憲案一覧</a>
 	</p>
 	<h1 class="font-mincho mb-2 text-xl" style="color: var(--ink);">{draft.data.name}</h1>
-	<div class="font-mono mb-8 space-y-0.5 text-xs" style="color: var(--ink-muted);">
+	<div class="font-mono mb-4 space-y-0.5 text-xs" style="color: var(--ink-muted);">
 		<p>提案: {draft.data.proposer} / 公表日: {draft.data.published_at.toISOString().slice(0, 10)}</p>
 		<p>出典: <a href={draft.data.source_url}>{draft.data.source_url}</a></p>
 		<p>最終確認日: {draft.data.retrieved_at.toISOString().slice(0, 10)}</p>
 	</div>
+
+	<p class="font-mono mb-8 text-sm">
+		<a href={`${base}drafts/${draft.id}/branch`} class="rounded-md border px-3 py-1.5 no-underline hover:underline" style="border-color: var(--line);">
+			ブランチとして全文を見る(成立後の条文を、前文から通しで表示する) →
+		</a>
+	</p>
 
 	<h2 class="font-mono mb-3 text-sm" style="color: var(--ink-muted);">変更された条文({changedArticles.length + deletedArticles.length})</h2>
 	<ul class="divide-y border-t border-b" style="border-color: var(--line);">

@@ -1,6 +1,7 @@
 ---
 import { getCollection, type CollectionEntry } from 'astro:content';
 import BaseLayout from '../../../layouts/BaseLayout.astro';
+import CommentList from '../../../components/CommentList.astro';
 import { articleLabel, computeDraftArticleDiff } from '../../../lib/draftDiff';
 
 export async function getStaticPaths() {
@@ -25,6 +26,12 @@ interface Props {
 const { draft, entry } = Astro.props;
 const row = await computeDraftArticleDiff(entry);
 const base = import.meta.env.BASE_URL;
+
+// この改憲案に対するコメント(draft_id が一致し、この条文を対象とするもの)のみを表示する。
+// 現行条文へのコメント(draft_id: null)は /articles/[id] 側に表示されるため、ここには出さない。
+const comments = (await getCollection('comments')).filter(
+  (comment) => comment.data.verified && comment.data.draft_id === draft.id && comment.data.article_ids.includes(entry.data.id),
+);
 ---
 
 <BaseLayout
@@ -63,6 +70,8 @@ const base = import.meta.env.BASE_URL;
 			))}
 		</div>
 	</div>
+
+	<CommentList comments={comments} heading="この変更についてのコメント" />
 
 	<p class="font-mono mt-4 text-xs" style="color: var(--ink-muted);">
 		出典: <a href={entry.data.source_url}>{entry.data.source_url}</a> / 最終確認日: {entry.data.retrieved_at.toISOString().slice(0, 10)}
