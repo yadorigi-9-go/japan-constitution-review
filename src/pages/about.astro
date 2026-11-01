@@ -1,0 +1,124 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+const base = import.meta.env.BASE_URL;
+
+const readingGuide = [
+	{ github: 'リポジトリのトップ', site: '条文タブ(トップページ)', desc: '現行憲法の章・条文の一覧(ファイルツリー風)' },
+	{ github: 'ブランチ', site: 'ブランチ(「main(現行憲法)」/各改憲案)', desc: 'その改憲案が成立した場合の条文を、前文から通しで表示' },
+	{ github: 'ファイル表示', site: '条文ページ', desc: '条文本文。行ごとにコメント件数を表示' },
+	{ github: 'コードレビューコメント', site: '条文へのコメント', desc: '実在の政治家の国会発言を、該当する条文の行に紐づけて表示' },
+	{ github: 'Pull Requests', site: '改憲案一覧', desc: '改憲案を、現行憲法への変更提案として一覧表示' },
+	{ github: 'Files changed(diff)', site: '改憲案の詳細', desc: '現行条文との差分(追加は下線、削除は取り消し線)と、その変更へのコメント' },
+];
+
+const references = [
+	{
+		name: 'e-Gov 法令検索',
+		url: 'https://laws.e-gov.go.jp/',
+		desc: '現行の日本国憲法の条文テキストの出典元。',
+	},
+	{
+		name: '国会会議録検索システム(国立国会図書館)',
+		url: 'https://kokkai.ndl.go.jp/',
+		desc: 'コメントとして掲載している国会での発言の一次資料。すべての発言の出典元。',
+	},
+	{
+		name: '自民党の改憲草案で憲法はどう変わる？',
+		url: 'https://kaikensouan.com',
+		desc: '自民党の改憲草案で争点として大きく指摘されている条文の洗い出しに参考にした。',
+	},
+	{
+		name: '自由民主党「日本国憲法改正草案」(2012年)',
+		url: 'https://www.jimin.jp/constitution/document/draft/index.html',
+		desc: 'jimin-2012 の出典元。',
+	},
+	{
+		name: '自由民主党「憲法改正に関する議論の状況について」(2018年)',
+		url: 'https://www.jimin.jp/constitution/document/discussion/',
+		desc: 'jimin-2018(条文イメージ(たたき台素案))の出典元。',
+	},
+];
+---
+
+<BaseLayout
+	title="このサイトについて | 日本国憲法レビュー"
+	description="日本国憲法レビューのコンセプト・使い方・方針と、参考にしたサイトの一覧。"
+>
+	<p class="font-mono mb-4 text-sm">
+		<a href={base}>&larr; 条文一覧</a>
+	</p>
+	<h1 class="font-mincho mb-4 text-xl" style="color: var(--ink);">このサイトについて</h1>
+
+	<section class="mb-8">
+		<h2 class="font-mono mb-2 text-sm" style="color: var(--ink-muted);">コンセプト</h2>
+		<p class="mb-2 text-sm leading-relaxed" style="color: var(--ink);">
+			日本国憲法を「コードベース」、改憲案を「プルリクエスト」に見立て、実在の政治家の国会発言を「コードレビューコメント」として、エンジニアの視点から条文単位で検証するサイトです。
+		</p>
+		<p class="text-sm leading-relaxed" style="color: var(--ink);">
+			現行憲法の仕組み(誰が・何を・どの条件で判断できるか)、改憲案が加える権限と外れる歯止め、改憲した場合のリスクと現状維持した場合の課題を、あわせて確認できます。
+		</p>
+	</section>
+
+	<section class="mb-8">
+		<h2 class="font-mono mb-3 text-sm" style="color: var(--ink-muted);">画面の読み方</h2>
+		<div class="overflow-x-auto">
+			<table class="w-full border-collapse text-sm">
+				<thead>
+					<tr class="border-b" style="border-color: var(--line);">
+						<th class="font-mono px-2 py-1.5 text-left text-xs" style="color: var(--ink-muted);">対応するもの</th>
+						<th class="font-mono px-2 py-1.5 text-left text-xs" style="color: var(--ink-muted);">このサイトでの名前</th>
+						<th class="font-mono px-2 py-1.5 text-left text-xs" style="color: var(--ink-muted);">内容</th>
+					</tr>
+				</thead>
+				<tbody class="divide-y" style="border-color: var(--line);">
+					{readingGuide.map((row) => (
+						<tr>
+							<td class="px-2 py-2 align-top whitespace-nowrap" style="color: var(--ink-muted);">{row.github}</td>
+							<td class="px-2 py-2 align-top font-mincho" style="color: var(--ink);">{row.site}</td>
+							<td class="px-2 py-2 align-top" style="color: var(--ink);">{row.desc}</td>
+						</tr>
+					))}
+				</tbody>
+			</table>
+		</div>
+	</section>
+
+	<section class="mb-8">
+		<h2 class="font-mono mb-2 text-sm" style="color: var(--ink-muted);">サイトの立場</h2>
+		<p class="mb-2 text-sm leading-relaxed" style="color: var(--ink);">
+			主眼は中立です。現行憲法のままの課題も課題として載せ、改憲を支持する側の論拠も最も強い形で併記し、事実・解釈・意見・引用を区別して表示します。
+		</p>
+		<p class="text-sm leading-relaxed" style="color: var(--ink);">
+			特定の政党・政治家の支持や不支持を呼びかけるものではなく、条文の法的な有権解釈を提供するものでもありません(参考資料であり、法的助言ではありません)。
+		</p>
+	</section>
+
+	<section class="mb-8">
+		<h2 class="font-mono mb-2 text-sm" style="color: var(--ink-muted);">厳守する方針</h2>
+		<ul class="list-disc space-y-1 pl-5 text-sm leading-relaxed" style="color: var(--ink);">
+			<li>発言・出典・URL・日付を創作しません。確認できないものは空欄にするか、サイト上に掲載しません(<code>verified: false</code> のコメントは非公開)</li>
+			<li>コメントは短い抜粋と出典リンクにとどめ、発言の全文は転載しません</li>
+			<li>実在の政治家に関する記述は、発言内容の事実記述にとどめ、評価語は使いません</li>
+			<li>特定の政治家の発言をまとめたページは作らず、条文単位で構成します</li>
+			<li>AIが書いた要約文は、「AIによる要約」と明記します</li>
+		</ul>
+		<p class="font-mono mt-3 text-xs" style="color: var(--ink-muted);">
+			設計・データモデルの詳細は <a href="https://github.com/yadorigi-9-go/japan-constitution-review/blob/main/docs/design.md">docs/design.md</a> を参照してください。
+		</p>
+	</section>
+
+	<section>
+		<h2 class="font-mono mb-3 text-sm" style="color: var(--ink-muted);">参考にしたサイト</h2>
+		<ul class="divide-y border-t border-b" style="border-color: var(--line);">
+			{references.map((ref) => (
+				<li class="py-3">
+					<a href={ref.url} class="no-underline hover:underline">
+						<span class="font-mincho" style="color: var(--ink);">{ref.name}</span>
+					</a>
+					<p class="font-mono mt-1 text-xs" style="color: var(--ink-muted);">{ref.desc}</p>
+				</li>
+			))}
+		</ul>
+	</section>
+</BaseLayout>
