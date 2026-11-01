@@ -1,6 +1,7 @@
 ---
 import { getCollection, type CollectionEntry } from 'astro:content';
 import BaseLayout from '../../../layouts/BaseLayout.astro';
+import BranchSelector from '../../../components/BranchSelector.astro';
 import { articleLabel } from '../../../lib/draftDiff';
 
 export async function getStaticPaths() {
@@ -128,6 +129,8 @@ const statusLabel = { changed: '変更', new: '新設', renamed: '改番', delet
 	<p class="font-mono mb-6 text-sm" style="color: var(--ink-muted);">
 		この改憲案が成立した場合の条文を、前文から通しで表示します。変更のない条文は現行の本文のままです。
 	</p>
+
+	<BranchSelector current={draft.id} />
 
 	<div class="border-t" style="border-color: var(--line);">
 		{groups.map((group) => (

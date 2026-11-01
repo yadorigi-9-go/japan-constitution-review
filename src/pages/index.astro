@@ -1,6 +1,7 @@
 ---
 import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
+import BranchSelector from '../components/BranchSelector.astro';
 
 // 前文を先頭に、条文は条文番号(数値)の昇順で並べる。
 const articles = (await getCollection('articles')).sort((a, b) => {
@@ -47,6 +48,8 @@ const base = import.meta.env.BASE_URL;
 		<a href="https://github.com/yadorigi-9-go/japan-constitution-review/blob/main/docs/design.md">docs/design.md</a
 		> を参照してください。
 	</p>
+
+	<BranchSelector current="main" />
 
 	<div class="mb-8 flex gap-4 font-mono text-sm">
 		<a class="rounded-md border px-3 py-1.5 no-underline hover:underline" style="border-color: var(--line);" href={`${base}drafts`}>改憲案一覧 →</a>
