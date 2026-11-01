@@ -1,0 +1,35 @@
+---
+import { getCollection } from 'astro:content';
+
+interface Props {
+	// 'main' = 現行憲法、それ以外は draft の id。
+	current: string;
+}
+
+const { current } = Astro.props;
+const base = import.meta.env.BASE_URL;
+const drafts = await getCollection('drafts');
+---
+
+<div class="font-mono mb-6 flex items-center gap-2 text-sm">
+	<label for="branch-select" style="color: var(--ink-muted);">ブランチ:</label>
+	<select
+		id="branch-select"
+		class="rounded-md border px-2 py-1"
+		style="border-color: var(--line); background: var(--paper-raised); color: var(--ink);"
+	>
+		<option value={base} selected={current === 'main'}>main(現行憲法)</option>
+		{drafts.map((draft) => (
+			<option value={`${base}drafts/${draft.id}/branch`} selected={current === draft.id}>
+				{draft.id}({draft.data.name})
+			</option>
+		))}
+	</select>
+</div>
+
+<script>
+	document.getElementById('branch-select')?.addEventListener('change', (event) => {
+		const value = (event.target as HTMLSelectElement).value;
+		if (value) window.location.href = value;
+	});
+</script>
