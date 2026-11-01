@@ -8,6 +8,10 @@ dist/
 # 再生成可能な生データ(APIから取得、人の確認前)。コミットしない。
 data/raw/
 
+# scripts/check_links.py の結果 (再生成可能)。src/pages/admin/stale.astro が
+# あれば読み込む任意のレポート (Issue #52)。
+data/link_check_report.json
+
 # Logs
 logs
 *.log

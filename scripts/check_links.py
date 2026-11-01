@@ -4,8 +4,14 @@
 
 標準ライブラリのみを使用する (追加の依存なし)。
 サーバーへの負荷を避けるため、リクエスト間に待機時間を置く。
+
+結果は data/link_check_report.json にも書き出す (再生成可能なため .gitignore 済み)。
+src/pages/admin/stale.astro がビルド時に存在すれば読み込んで表示する
+(Astro 側はこのファイルを読むだけで、ネットワークアクセスは行わない)。
 """
 
+import datetime
+import json
 import pathlib
 import re
 import sys
@@ -18,6 +24,9 @@ URL_PATTERN = re.compile(r'^\s*(?:source_url|archive_url):\s*"([^"]+)"', re.MULT
 REQUEST_INTERVAL_SECONDS = 3
 TIMEOUT_SECONDS = 15
 USER_AGENT = "japan-constitution-review-link-checker/1.0"
+# admin/stale ページ (Astro, ビルド時) が任意で読み込むレポート。
+# 再生成可能なローカル出力のため data/raw/ と同様にコミットしない (.gitignore)。
+REPORT_PATH = DATA_DIR / "link_check_report.json"
 
 
 def collect_urls() -> dict[str, list[pathlib.Path]]:
@@ -52,6 +61,28 @@ def check_url(url: str) -> tuple[bool, str]:
         return False, str(e.reason)
 
 
+def write_report(urls: dict[str, list[pathlib.Path]], broken: list[tuple[str, str, list[pathlib.Path]]]) -> None:
+    """admin/stale ページが任意で読み込むための JSON レポートを書き出す (docs/design.md 10, Issue #52)。
+
+    このファイル自体はビルド時に Astro が読む可能性があるが、Astro 側は
+    このファイルを読むだけで、ネットワークアクセスは一切行わない
+    (リンク切れチェックはあくまでこのスクリプトが担う)。
+    """
+    report = {
+        "checked_at": datetime.datetime.now(datetime.timezone.utc).isoformat(),
+        "total_checked": len(urls),
+        "broken": [
+            {
+                "url": url,
+                "detail": detail,
+                "referenced_by": [str(p.relative_to(DATA_DIR.parent)) for p in paths],
+            }
+            for url, detail, paths in broken
+        ],
+    }
+    REPORT_PATH.write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+
+
 def main() -> int:
     urls = collect_urls()
     print(f"Checking {len(urls)} unique URLs from {DATA_DIR}")
@@ -65,6 +96,8 @@ def main() -> int:
             broken.append((url, detail, paths))
         if i < len(urls) - 1:
             time.sleep(REQUEST_INTERVAL_SECONDS)
+
+    write_report(urls, broken)
 
     if broken:
         print(f"\n{len(broken)} broken link(s):")

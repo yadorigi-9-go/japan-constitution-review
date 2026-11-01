@@ -1,0 +1,226 @@
+---
+// 管理用ページ: 「最終確認日」が古いデータと、リンク切れチェックの状況を一覧表示する
+// (GitHub Issue #52)。サイト訪問者向けではないため、BaseLayout のタブには載せず、
+// about.astro から直接リンクするだけにしている。
+//
+// 重要: このページはビルド時に外部へのネットワークアクセスを一切行わない。
+// リンク切れの確認は scripts/check_links.py (国会会議録APIのレート制限を守って
+// 動く別プロセス、.github/workflows/check-links.yml で週次実行) が担当する。
+// Astro の静的ビルドでそれを再実装すると、ビルドごとに同じチェックを重複実行してしまい、
+// レート制限ポリシーに反するおそれがあるため、ここでは行わない。
+import fs from 'node:fs';
+import path from 'node:path';
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { articleLabel } from '../../lib/draftDiff';
+
+// 「最終確認日」をいつから古いと見なすかの閾値(日数)。
+// docs/design.md 10「改憲をめぐる議論は動きやすいため、定期的に更新する」方針に基づき、
+// 半年(約180日)を目安にする。これを超えたら出典・内容の再確認を検討する。
+const STALE_THRESHOLD_DAYS = 180;
+const MS_PER_DAY = 1000 * 60 * 60 * 24;
+
+// 定期的に再ビルド・再デプロイされる静的サイトという前提で、ビルド時刻を「現在」とする
+// (docs/design.md 9: ビルド時に HTML を生成する静的サイト)。
+const buildDate = new Date();
+function daysSince(date: Date): number {
+	return Math.floor((buildDate.getTime() - date.getTime()) / MS_PER_DAY);
+}
+
+const base = import.meta.env.BASE_URL;
+
+interface StaleEntry {
+	category: string;
+	label: string;
+	source: string;
+	date: Date;
+	daysOld: number;
+	href: string;
+}
+
+const entries: StaleEntry[] = [];
+
+// 1. 条文 (data/articles/*.yaml, retrieved_at)
+for (const article of await getCollection('articles')) {
+	const label = article.data.kind === 'preamble' ? '前文' : `第${article.data.number}条`;
+	entries.push({
+		category: '条文',
+		label,
+		source: `data/articles/${article.id}.yaml`,
+		date: article.data.retrieved_at,
+		daysOld: daysSince(article.data.retrieved_at),
+		href: `${base}articles/${article.id}`,
+	});
+}
+
+// 2. 改憲案本体 (data/drafts/<id>/meta.yaml, retrieved_at)
+const drafts = await getCollection('drafts');
+for (const draft of drafts) {
+	entries.push({
+		category: '改憲案',
+		label: draft.data.name,
+		source: `data/drafts/${draft.id}/meta.yaml`,
+		date: draft.data.retrieved_at,
+		daysOld: daysSince(draft.data.retrieved_at),
+		href: `${base}drafts/${draft.id}`,
+	});
+}
+
+// 3. 改憲案の変更条文 (data/drafts/<id>/art-XXX.yaml・preamble.yaml, retrieved_at)
+for (const entry of await getCollection('draftArticles')) {
+	const draftId = entry.id.split('/')[0];
+	entries.push({
+		category: '改憲案の条文',
+		label: `${entry.data.title}(${articleLabel(entry.data.id)})`,
+		source: `data/drafts/${entry.id}.yaml`,
+		date: entry.data.retrieved_at,
+		daysOld: daysSince(entry.data.retrieved_at),
+		href: `${base}drafts/${draftId}/${entry.data.id}`,
+	});
+}
+
+// 4. 改憲案の削除条文 (data/drafts/<id>/del-*.yaml, retrieved_at)
+for (const entry of await getCollection('draftDeletions')) {
+	const draftId = entry.id.split('/')[0];
+	entries.push({
+		category: '改憲案の削除条文',
+		label: `${entry.data.title}(${articleLabel(entry.data.id)})`,
+		source: `data/drafts/${entry.id}.yaml`,
+		date: entry.data.retrieved_at,
+		daysOld: daysSince(entry.data.retrieved_at),
+		href: `${base}drafts/${draftId}/deleted/${entry.data.id}`,
+	});
+}
+
+// 5. コメント (data/comments/<article-id>/<id>.yaml, accessed_at)
+// verified: false のコメントは非公開のため対象外にする (docs/design.md 10)。
+for (const comment of await getCollection('comments')) {
+	if (!comment.data.verified) continue;
+	const firstArticleId = comment.data.article_ids[0];
+	entries.push({
+		category: 'コメント',
+		label: `${comment.data.speaker.name}(${comment.data.venue})`,
+		source: `data/comments/${comment.id}.yaml`,
+		date: comment.data.accessed_at,
+		daysOld: daysSince(comment.data.accessed_at),
+		href: firstArticleId ? `${base}articles/${firstArticleId}` : base,
+	});
+}
+
+const staleEntries = entries
+	.filter((entry) => entry.daysOld > STALE_THRESHOLD_DAYS)
+	.sort((a, b) => b.daysOld - a.daysOld);
+
+// リンク切れチェックの結果 (任意)。scripts/check_links.py が書き出す
+// data/link_check_report.json が存在する場合のみ読み込む。存在しなくても
+// (本番ビルドでは存在しない想定) ページ自体は問題なく表示できるようにする。
+// この読み込みはローカルファイルの読み取りのみで、ネットワークアクセスは行わない。
+interface LinkCheckReport {
+	checked_at: string;
+	total_checked: number;
+	broken: { url: string; detail: string; referenced_by: string[] }[];
+}
+
+let linkReport: LinkCheckReport | null = null;
+try {
+	const reportPath = path.resolve('data/link_check_report.json');
+	if (fs.existsSync(reportPath)) {
+		linkReport = JSON.parse(fs.readFileSync(reportPath, 'utf-8')) as LinkCheckReport;
+	}
+} catch {
+	linkReport = null;
+}
+---
+
+<BaseLayout
+	title="データ確認状況(管理用) | 日本国憲法レビュー"
+	description="最終確認日が古いデータと、リンク切れチェックの実行状況を一覧表示する管理用ページ。"
+>
+	<p class="font-mono mb-4 text-sm">
+		<a href={`${base}about`}>&larr; このサイトについて</a>
+	</p>
+	<h1 class="font-mincho mb-2 text-xl" style="color: var(--ink);">データ確認状況(管理用)</h1>
+	<p class="font-mono mb-8 text-xs" style="color: var(--ink-muted);">
+		このページは訪問者向けではなく、データの再確認のための管理用一覧です(ビルド時刻: {buildDate.toISOString().slice(0, 10)})。
+	</p>
+
+	<section class="mb-10">
+		<h2 class="font-mono mb-2 text-sm" style="color: var(--ink-muted);">
+			最終確認日が古いデータ({staleEntries.length})
+		</h2>
+		<p class="mb-3 text-sm leading-relaxed" style="color: var(--ink);">
+			「最終確認日」(<code>retrieved_at</code> / <code>accessed_at</code>)から{STALE_THRESHOLD_DAYS}日以上経過したものを、古い順に一覧表示します。
+		</p>
+		{staleEntries.length === 0 ? (
+			<p class="rounded-md border px-3 py-2 text-sm" style="border-color: var(--line); color: var(--ink-muted);">
+				現時点で{STALE_THRESHOLD_DAYS}日を超えて古いデータはありません。
+			</p>
+		) : (
+			<div class="overflow-x-auto">
+				<table class="w-full border-collapse text-sm">
+					<thead>
+						<tr class="border-b" style="border-color: var(--line);">
+							<th class="font-mono px-2 py-1.5 text-left text-xs" style="color: var(--ink-muted);">経過日数</th>
+							<th class="font-mono px-2 py-1.5 text-left text-xs" style="color: var(--ink-muted);">最終確認日</th>
+							<th class="font-mono px-2 py-1.5 text-left text-xs" style="color: var(--ink-muted);">種別</th>
+							<th class="font-mono px-2 py-1.5 text-left text-xs" style="color: var(--ink-muted);">対象</th>
+							<th class="font-mono px-2 py-1.5 text-left text-xs" style="color: var(--ink-muted);">データファイル</th>
+						</tr>
+					</thead>
+					<tbody class="divide-y" style="border-color: var(--line);">
+						{staleEntries.map((entry) => (
+							<tr>
+								<td class="px-2 py-2 align-top font-mono whitespace-nowrap" style="color: var(--danger);">{entry.daysOld}日</td>
+								<td class="px-2 py-2 align-top font-mono whitespace-nowrap" style="color: var(--ink-muted);">
+									{entry.date.toISOString().slice(0, 10)}
+								</td>
+								<td class="px-2 py-2 align-top whitespace-nowrap"><span class="tag">{entry.category}</span></td>
+								<td class="px-2 py-2 align-top">
+									<a href={entry.href} class="no-underline hover:underline" style="color: var(--ink);">{entry.label}</a>
+								</td>
+								<td class="px-2 py-2 align-top font-mono text-xs" style="color: var(--ink-muted);">{entry.source}</td>
+							</tr>
+						))}
+					</tbody>
+				</table>
+			</div>
+		)}
+	</section>
+
+	<section>
+		<h2 class="font-mono mb-2 text-sm" style="color: var(--ink-muted);">リンク切れチェック</h2>
+		<p class="mb-2 text-sm leading-relaxed" style="color: var(--ink);">
+			リンク切れの確認は、このサイトのビルドとは別に、
+			<a href="https://github.com/yadorigi-9-go/japan-constitution-review/blob/main/scripts/check_links.py">scripts/check_links.py</a>
+			が
+			<a href="https://github.com/yadorigi-9-go/japan-constitution-review/blob/main/.github/workflows/check-links.yml">.github/workflows/check-links.yml</a>
+			により毎週月曜に実行しています。国会会議録検索システムのレート制限(多重リクエスト禁止)を守るため、このサイトのビルド自体は外部URLへのアクセスを一切行いません。
+		</p>
+		{linkReport ? (
+			<>
+				<p class="font-mono mb-3 text-xs" style="color: var(--ink-muted);">
+					ローカルの data/link_check_report.json を読み込みました(最終チェック: {linkReport.checked_at.slice(0, 10)} / {linkReport.total_checked}件確認)。
+					このファイルは再生成可能なためコミットされておらず、本番ビルドには存在しません。
+				</p>
+				{linkReport.broken.length === 0 ? (
+					<p class="rounded-md border px-3 py-2 text-sm" style="border-color: var(--line); color: var(--ink-muted);">
+						前回のチェックでリンク切れは見つかりませんでした。
+					</p>
+				) : (
+					<ul class="divide-y border-t border-b" style="border-color: var(--line);">
+						{linkReport.broken.map((item) => (
+							<li class="py-2 text-sm">
+								<p class="font-mono" style="color: var(--danger);">{item.detail} — <a href={item.url}>{item.url}</a></p>
+								<p class="font-mono text-xs" style="color: var(--ink-muted);">参照元: {item.referenced_by.join(', ')}</p>
+							</li>
+						))}
+					</ul>
+				)}
+			</>
+		) : (
+			<p class="font-mono text-xs" style="color: var(--ink-muted);">
+				ローカルに data/link_check_report.json が見つからないため、結果はここには表示されません(<code>npm run check:links</code> を実行すると生成されます)。実行結果は GitHub Actions のログで確認してください。
+			</p>
+		)}
+	</section>
+</BaseLayout>
