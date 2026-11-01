@@ -1,0 +1,21 @@
+id: c-20130612-fukushima
+article_ids: [art-019-2]
+draft_id: jimin-2012
+kind: speech
+claim_type: concern
+stance: oppose
+source_type: primary
+speaker:
+  name: "福島みずほ"
+  role: "参議院議員"
+  party: "社会民主党・護憲連合"
+date: 2013-06-12
+venue: "参議院憲法審査会"
+excerpt: "これでは、ジャーナリスト、議員、市民が情報を取得しようとすることがこれに触れる場合が出てくる、そういう危険も生じてまいります。"
+summary: "社会民主党・護憲連合の福島みずほ参議院議員が、プライバシー権などの新しい人権は現行憲法の規定から既に根拠づけられるため新設は不要との立場を示した上で、自民党2012年改憲草案が新設する「個人に関する情報を不当に取得し、保有し、又は利用してはならない」との規定について、ジャーナリストや議員・市民による情報収集がこれに触れる危険があると批判した。"
+summary_source: ai
+source_url: "https://kokkai.ndl.go.jp/txt/118314183X00620130612/16"
+archive_url: ""
+accessed_at: 2026-11-01
+tags: ["個人情報", "プライバシー", "自民党2012年改憲草案"]
+verified: true
