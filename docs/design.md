@@ -296,6 +296,7 @@ GitHub Actions で次を自動化する。
 
 - 改憲をめぐる議論は動きやすいため、各ページに「最終確認日」を表示し、定期的に更新する。
 - 変更はプルリクエストでレビューし、出典の確認を必須にする。(2026-11-01 よりブランチ+PRでの運用に変更)
+- 外部からの実発言コメントの追加方法(手元のAIアシスタント向けプロンプトを含む)は [CONTRIBUTING.md](../CONTRIBUTING.md) を参照(2026-11-01)。GitHub Actions等による自動下書き生成は、secretsの管理やフォークPRへの安全性の懸念から見送った([#76](https://github.com/yadorigi-9-go/japan-constitution-review/issues/76))。
 
 ---
 
