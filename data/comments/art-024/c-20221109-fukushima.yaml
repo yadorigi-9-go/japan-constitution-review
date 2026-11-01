@@ -1,0 +1,21 @@
+id: c-20221109-fukushima
+article_ids: [art-024]
+draft_id: jimin-2012
+kind: speech
+claim_type: concern
+stance: oppose
+source_type: primary
+speaker:
+  name: "福島みずほ"
+  role: "参議院議員"
+  party: "立憲民主・社民"
+date: 2022-11-09
+venue: "参議院憲法審査会"
+excerpt: "憲法二十四条一項に、家族は社会の自然かつ基礎的な単位であり、尊重される、家族は互いに助け合わなければならないとしています。公助ではなく自助の強調です。"
+summary: "立憲民主・社民の福島みずほ参議院議員が、自民党2012年改憲草案第24条1項が新設する「家族は、互いに助け合わなければならない」との規定を引用し、国(公助)ではなく家族(自助)による支え合いを強調するものだと批判した。"
+summary_source: ai
+source_url: "https://kokkai.ndl.go.jp/txt/121014183X00220221109/34"
+archive_url: ""
+accessed_at: 2026-11-01
+tags: ["家族条項", "自助・公助", "自民党2012年改憲草案"]
+verified: true
