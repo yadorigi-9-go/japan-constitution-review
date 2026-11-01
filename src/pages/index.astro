@@ -36,6 +36,9 @@ for (const article of articles) {
   }
 }
 
+// 章フィルタの選択肢(出現順、重複なし)。前文には章がないため含めない。
+const chapters = rows.map((row) => row.chapter).filter((chapter): chapter is string => chapter !== null);
+
 const base = import.meta.env.BASE_URL;
 ---
 
@@ -56,9 +59,29 @@ const base = import.meta.env.BASE_URL;
 		<a class="rounded-md border px-3 py-1.5 no-underline hover:underline" style="border-color: var(--line);" href={`${base}about`}>このサイトについて →</a>
 	</div>
 
+	<div class="font-mono mb-4 flex flex-wrap items-center gap-4 text-sm" style="color: var(--ink-muted);">
+		<div class="flex items-center gap-2">
+			<label for="chapter-filter">章:</label>
+			<select
+				id="chapter-filter"
+				class="rounded-md border px-2 py-1"
+				style="border-color: var(--line); background: var(--paper-raised); color: var(--ink);"
+			>
+				<option value="all">すべての章</option>
+				{chapters.map((chapter) => (
+					<option value={chapter}>{chapter}</option>
+				))}
+			</select>
+		</div>
+		<label class="flex items-center gap-1.5">
+			<input type="checkbox" id="comment-filter" />
+			コメントのある条文のみ
+		</label>
+	</div>
+
 	<div class="border-t" style="border-color: var(--line);">
 		{rows.map((row) => (
-			<div>
+			<div data-chapter-group={row.chapter ?? ''}>
 				{row.chapter && (
 					<p class="font-mono mt-4 px-1 py-1 text-xs tracking-wide" style="color: var(--ink-muted);">
 						{row.chapter}
@@ -69,7 +92,7 @@ const base = import.meta.env.BASE_URL;
 						const count = commentCountByArticleId.get(article.id) ?? 0;
 						const label = article.data.kind === 'preamble' ? '前文' : `第${article.data.number}条`;
 						return (
-							<li class="border-b" style="border-color: var(--line);">
+							<li class="border-b" style="border-color: var(--line);" data-comment-count={count}>
 								<a
 									href={`${base}articles/${article.id}`}
 									class="flex items-baseline gap-3 px-1 py-2 no-underline hover:underline"
@@ -87,4 +110,29 @@ const base = import.meta.env.BASE_URL;
 			</div>
 		))}
 	</div>
+
+	<script>
+		const chapterFilter = document.getElementById('chapter-filter') as HTMLSelectElement | null;
+		const commentFilter = document.getElementById('comment-filter') as HTMLInputElement | null;
+		const groups = document.querySelectorAll<HTMLElement>('[data-chapter-group]');
+
+		function applyFilters() {
+			const chapter = chapterFilter?.value ?? 'all';
+			const onlyWithComments = commentFilter?.checked ?? false;
+			for (const group of groups) {
+				const chapterMatches = chapter === 'all' || group.dataset.chapterGroup === chapter;
+				let visibleCount = 0;
+				for (const li of group.querySelectorAll<HTMLElement>('li')) {
+					const count = Number(li.dataset.commentCount ?? '0');
+					const visible = chapterMatches && (!onlyWithComments || count > 0);
+					li.classList.toggle('hidden', !visible);
+					if (visible) visibleCount++;
+				}
+				group.classList.toggle('hidden', visibleCount === 0);
+			}
+		}
+
+		chapterFilter?.addEventListener('change', applyFilters);
+		commentFilter?.addEventListener('change', applyFilters);
+	</script>
 </BaseLayout>
