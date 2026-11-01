@@ -21,7 +21,7 @@ const drafts = await getCollection('drafts');
 		<option value={base} selected={current === 'main'}>main(現行憲法)</option>
 		{drafts.map((draft) => (
 			<option value={`${base}drafts/${draft.id}/branch`} selected={current === draft.id}>
-				{draft.id}({draft.data.name})
+				{draft.id}({draft.data.name}){draft.data.status === 'outline' ? '[たたき台]' : ''}
 			</option>
 		))}
 	</select>

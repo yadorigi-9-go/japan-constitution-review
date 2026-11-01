@@ -24,12 +24,21 @@ const base = import.meta.env.BASE_URL;
 // こちらは変更の有無を問わず、前文〜最終条まで通しで並べる(条文一覧トップと同じ構成)。
 interface BranchRow {
   sortKey: number;
+  // 条番号(sortKey)が同じ場合の並び順。例: art-009 は 0、枝番の art-009-2 は 2。
+  // ベースの条文(枝番なし)が常に自分の枝番付き条文より先に来るようにする。
+  branchSuffix: number;
   isPreamble: boolean;
   chapter: string | null;
   label: string;
   idForDisplay: string;
   href: string;
   status: 'changed' | 'new' | 'renamed' | 'deleted' | null;
+}
+
+// "art-009-2" → 2 、"art-009" や "preamble" など枝番のないものは 0。
+function branchSuffix(id: string): number {
+  const match = id.match(/^(?:del-)?art-\d{3}-(\d+)$/);
+  return match ? Number(match[1]) : 0;
 }
 
 const articles = await getCollection('articles');
@@ -55,6 +64,7 @@ for (const entry of draftArticles) {
   const isPreamble = entry.data.id === 'preamble';
   rows.push({
     sortKey: isPreamble ? -1 : entry.data.number ?? 0,
+    branchSuffix: branchSuffix(entry.data.id),
     isPreamble,
     chapter: entry.data.chapter ?? null,
     label: articleLabel(entry.data.id),
@@ -68,6 +78,7 @@ for (const entry of draftDeletions) {
   const current = articleById.get(entry.data.id);
   rows.push({
     sortKey: current?.data.kind === 'article' ? current.data.number : -1,
+    branchSuffix: branchSuffix(entry.data.id),
     isPreamble: false,
     chapter: current?.data.kind === 'article' ? current.data.chapter : null,
     label: articleLabel(entry.data.id),
@@ -82,6 +93,7 @@ for (const article of articles) {
   const isPreamble = article.data.kind === 'preamble';
   rows.push({
     sortKey: isPreamble ? -1 : article.data.number,
+    branchSuffix: branchSuffix(article.id),
     isPreamble,
     chapter: article.data.kind === 'article' ? article.data.chapter : null,
     label: articleLabel(article.id),
@@ -91,7 +103,7 @@ for (const article of articles) {
   });
 }
 
-rows.sort((a, b) => a.sortKey - b.sortKey);
+rows.sort((a, b) => a.sortKey - b.sortKey || a.branchSuffix - b.branchSuffix);
 
 type ChapterGroup = { chapter: string | null; items: BranchRow[] };
 const groups: ChapterGroup[] = [];
