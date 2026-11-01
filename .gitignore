@@ -5,6 +5,9 @@ dist/
 # macOS
 .DS_Store
 
+# Claude Code ローカル設定・並行エージェント用のgit worktree
+.claude/
+
 # 再生成可能な生データ(APIから取得、人の確認前)。コミットしない。
 data/raw/
 

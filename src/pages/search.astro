@@ -21,9 +21,23 @@ const base = import.meta.env.BASE_URL;
 	<script is:inline src={`${base}pagefind/pagefind-ui.js`}></script>
 	<script is:inline>
 		window.addEventListener('DOMContentLoaded', () => {
-			if (typeof PagefindUI !== 'undefined') {
-				new PagefindUI({ element: '#search', showSubResults: true });
-			}
+			if (typeof PagefindUI === 'undefined') return;
+			new PagefindUI({ element: '#search', showSubResults: true });
+
+			// ?q=<発言者名> 等で来た場合、Pagefind UI の検索欄に自動入力する
+			// (issue #81: CommentList の発言者名からの検索導線)。
+			const q = new URLSearchParams(window.location.search).get('q');
+			if (!q) return;
+			const trySetQuery = () => {
+				const input = document.querySelector('#search input[type="text"]');
+				if (!input) {
+					setTimeout(trySetQuery, 50);
+					return;
+				}
+				input.value = q;
+				input.dispatchEvent(new Event('input', { bubbles: true }));
+			};
+			trySetQuery();
 		});
 	</script>
 </BaseLayout>
