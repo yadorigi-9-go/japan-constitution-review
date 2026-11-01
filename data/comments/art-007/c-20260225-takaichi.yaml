@@ -1,0 +1,21 @@
+id: c-20260225-takaichi
+article_ids: [art-007]
+draft_id: null
+kind: speech
+claim_type: interpretation
+stance: neutral
+source_type: primary
+speaker:
+  name: "高市早苗"
+  role: "内閣総理大臣"
+  party: "自由民主党・無所属の会"
+date: 2026-02-25
+venue: "参議院本会議"
+excerpt: "衆議院の解散は憲法七条の規定において天皇の国事に関する行為とされておりますが、実質的に衆議院の解散を決定する権限を有するのは、天皇の国事行為に関する行為について助言と承認を行う職務を有する内閣であると承知しています。"
+summary: "高市早苗内閣総理大臣が参議院本会議の答弁で、衆議院解散は憲法第7条上は天皇の国事行為だが、実質的な決定権は助言と承認を行う内閣にあるとの政府の理解を説明。続けて、解散の時期・理由について憲法上の制約はなく、内閣が政治的責任で判断するものとの考えを述べた。"
+summary_source: ai
+source_url: "https://kokkai.ndl.go.jp/txt/122115254X00320260225/3"
+archive_url: ""
+accessed_at: 2026-11-01
+tags: ["天皇の国事行為", "内閣の助言と承認", "衆議院解散"]
+verified: true
