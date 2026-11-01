@@ -70,7 +70,9 @@ const comments = defineCollection({
     kind: z.enum(['speech', 'review', 'embed']),
     claim_type: z.enum(['fact', 'interpretation', 'concern', 'quote']),
     stance: z.enum(['support', 'oppose', 'neutral']),
-    source_type: z.enum(['primary', 'news', 'organization']),
+    // self: 政治家本人による発信(個人ブログ・SNS投稿等)。primary(国会会議録等の一次資料)
+    // とは出典の性質が異なるため区別する(Issue #80)。
+    source_type: z.enum(['primary', 'news', 'organization', 'self']),
     speaker: z.object({
       name: z.string(),
       role: z.string(),
