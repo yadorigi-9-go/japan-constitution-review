@@ -1,0 +1,21 @@
+id: c-20161124-miyazaki
+article_ids: [art-102, art-099]
+draft_id: jimin-2012
+kind: speech
+claim_type: interpretation
+stance: support
+source_type: primary
+speaker:
+  name: "宮崎政久"
+  role: "衆議院議員"
+  party: "自由民主党・無所属の会"
+date: 2016-11-24
+venue: "衆議院憲法審査会"
+excerpt: "立憲主義を根拠として一文字たりとも譲ってはいけないのだということであれば、立憲主義というものの歴史的な経過に学んでいない、思考停止としか言いようがないわけでありまして、そのような議論は成立しないと私は考えております。"
+summary: "自由民主党の宮崎政久衆議院議員が、草案第102条の国民の憲法尊重義務などの新設規定を取り上げた上で、立憲主義を根拠に一字一句の改正も認めないとする立場は、立憲主義の歴史的な経過を学んでいない思考停止だと反論し、時代の進展に応じた新たな規定として擁護した。"
+summary_source: ai
+source_url: "https://kokkai.ndl.go.jp/txt/119204183X00320161124/51"
+archive_url: ""
+accessed_at: 2026-11-01
+tags: ["憲法尊重擁護義務", "立憲主義", "自民党2012年改憲草案"]
+verified: true
