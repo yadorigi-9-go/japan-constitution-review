@@ -1,5 +1,6 @@
 ---
 import type { CollectionEntry } from 'astro:content';
+import { linkifyArticleRefs } from '../lib/articleLinks';
 
 interface Props {
 	comments: CollectionEntry<'comments'>[];
@@ -11,13 +12,21 @@ const base = import.meta.env.BASE_URL;
 
 const stanceLabel = { support: '賛成', oppose: '反対', neutral: '中立' } as const;
 const claimTypeLabel = { fact: '事実', interpretation: '解釈', concern: '懸念・予測', quote: '引用' } as const;
+
+// 本文中の「第96条」等の条文番号表記を、該当ページへのリンクに変換する (Issue #86)。
+const linkedText = await Promise.all(
+	comments.map(async (comment) => ({
+		excerpt: await linkifyArticleRefs(comment.data.excerpt, comment.data.draft_id, base),
+		summary: await linkifyArticleRefs(comment.data.summary, comment.data.draft_id, base),
+	})),
+);
 ---
 
 {comments.length > 0 && (
 	<section class="mt-8">
 		<h2 class="font-mono mb-3 text-sm" style="color: var(--ink-muted);">{heading}({comments.length})</h2>
 		<ul class="space-y-4">
-			{comments.map((comment) => (
+			{comments.map((comment, i) => (
 				<li class="overflow-hidden rounded-md border" style="border-color: var(--line);">
 					<div class="flex items-center gap-2 border-b px-3 py-2 text-sm" style="border-color: var(--line); background: var(--paper-raised);">
 						<span class="avatar" aria-hidden="true">{comment.data.speaker.name.slice(0, 1)}</span>
@@ -33,14 +42,12 @@ const claimTypeLabel = { fact: '事実', interpretation: '解釈', concern: '懸
 						<p class="mb-2 text-xs" style="color: var(--ink-muted);">
 							{comment.data.speaker.role} ・ {stanceLabel[comment.data.stance]} ・ {claimTypeLabel[comment.data.claim_type]}
 						</p>
-						<blockquote class="font-mincho mb-2 border-l-2 pl-3" style="border-color: var(--line); color: var(--ink);">
-							{comment.data.excerpt}
-						</blockquote>
+						<blockquote class="font-mincho mb-2 border-l-2 pl-3" style="border-color: var(--line); color: var(--ink);" set:html={linkedText[i].excerpt} />
 						<p class="mb-1 flex items-center gap-1.5 text-xs" style="color: var(--ink-muted);">
 							要約
 							{comment.data.summary_source === 'ai' && <span class="tag">AIによる要約</span>}
 						</p>
-						<p class="mb-1 text-sm" style="color: var(--ink);">{comment.data.summary}</p>
+						<p class="mb-1 text-sm" style="color: var(--ink);" set:html={linkedText[i].summary} />
 						<p class="font-mono text-xs" style="color: var(--ink-muted);">
 							{comment.data.venue}
 							{comment.data.source_url && (
