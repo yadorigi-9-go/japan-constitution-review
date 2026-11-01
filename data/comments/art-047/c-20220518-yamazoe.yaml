@@ -1,0 +1,21 @@
+id: c-20220518-yamazoe
+article_ids: [art-047]
+draft_id: null
+kind: speech
+claim_type: concern
+stance: oppose
+source_type: primary
+speaker:
+  name: "山添拓"
+  role: "参議院議員"
+  party: "日本共産党"
+date: 2022-05-18
+venue: "参議院憲法審査会"
+excerpt: "衆参双方で投票価値の平等を選挙制度構築に当たって考慮する一要素に格下げしようとするものであり、看過できません。"
+summary: "日本共産党の山添拓参議院議員が、自民党の2018年改憲草案が選挙区の画定基準に人口以外の要素を加えることについて、投票価値の平等を憲法上の要請から考慮要素の一つに格下げするものであり看過できないと批判し、都道府県単位の選挙区は憲法上の要請ではないとして現行制度の見直しを主張した。"
+summary_source: ai
+source_url: "https://kokkai.ndl.go.jp/txt/120814183X00520220518/23"
+archive_url: ""
+accessed_at: 2026-11-01
+tags: ["選挙区", "一票の格差", "投票価値の平等", "自民党たたき台素案"]
+verified: true
