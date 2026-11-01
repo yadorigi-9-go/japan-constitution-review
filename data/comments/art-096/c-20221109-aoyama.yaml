@@ -1,0 +1,21 @@
+id: c-20221109-aoyama
+article_ids: [art-096]
+draft_id: null
+kind: speech
+claim_type: interpretation
+stance: oppose
+source_type: primary
+speaker:
+  name: "青山繁晴"
+  role: "参議院議員"
+  party: "自由民主党"
+date: 2022-11-09
+venue: "参議院憲法審査会"
+excerpt: "かつて、このハードルが高過ぎるから、まずそれを修正しようという動きが一部に生じましたが、私はそれに反対です。"
+summary: "自由民主党の青山繁晴参議院議員が、憲法96条の改正発議要件(各議院の総議員の三分の二以上)について、そのハードルの高さを理由に先行して緩和しようとする動きに反対する立場を示し、96条の高いハードルは立憲主義を守るためのものだとして、現行規定のまま国民に改正を問いかけるべきだと主張した。"
+summary_source: ai
+source_url: "https://kokkai.ndl.go.jp/txt/121014183X00220221109/46"
+archive_url: ""
+accessed_at: 2026-11-01
+tags: ["改正発議要件", "96条改正論", "立憲主義"]
+verified: true

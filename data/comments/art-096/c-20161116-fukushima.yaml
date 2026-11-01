@@ -1,0 +1,21 @@
+id: c-20161116-fukushima
+article_ids: [art-096, art-100]
+draft_id: jimin-2012
+kind: speech
+claim_type: fact
+stance: oppose
+source_type: primary
+speaker:
+  name: "福島みずほ"
+  role: "参議院議員"
+  party: "希望の会(自由・社民)"
+date: 2016-11-16
+venue: "参議院憲法審査会"
+excerpt: "初め、憲法九十六条、憲法改正の発議を三分の二、それを過半数にするという意見が出ました。すると、裏口入学であるという批判が出て、この九十六条を改憲するという案は今の段階では引っ込みました。"
+summary: "希望の会(自由・社民)の福島みずほ参議院議員が、自民党「日本国憲法改正草案」が憲法改正の発議要件を各議院の総議員の三分の二から過半数に緩和しようとしたものの、本来改正すべき内容を議論せず入り口のハードルだけ下げる「裏口入学」だとの批判を受けて、その案を引っ込めた経緯を指摘し、同草案は極めて問題があると述べた。"
+summary_source: ai
+source_url: "https://kokkai.ndl.go.jp/txt/119214183X00220161116/36"
+archive_url: ""
+accessed_at: 2026-11-01
+tags: ["改正発議要件", "96条改正論", "自民党2012年改憲草案"]
+verified: true
