@@ -61,24 +61,42 @@ const base = import.meta.env.BASE_URL;
 	</p>
 
 	<h2 class="font-mono mb-3 text-sm" style="color: var(--ink-muted);">変更された条文({changedArticles.length + deletedArticles.length})</h2>
-	<ul class="divide-y border-t border-b" style="border-color: var(--line);">
-		{changedArticles.map((entry) => (
-			<li class="flex items-start gap-3 py-3">
-				<span class="mt-1.5 inline-block h-3 w-3 shrink-0 rounded-full" style="background: var(--danger);" aria-hidden="true" />
-				<div>
-					<a href={`${base}drafts/${draft.id}/${entry.data.id}`} class="no-underline hover:underline">
-						<span class="font-mincho text-lg" style="color: var(--ink);">{entry.data.title}</span>
-					</a>
-					<p class="font-mono mt-1 text-xs" style="color: var(--ink-muted);">
-						{entry.data.renamed_from && entry.data.renamed_from !== entry.data.id
-							? `${articleLabel(entry.data.renamed_from)} → ${articleLabel(entry.data.id)}`
-							: articleLabel(entry.data.id)}
-					</p>
-				</div>
-			</li>
+
+	<div class="font-mono mb-3 flex flex-wrap gap-2 text-sm" role="group" aria-label="種別で絞り込み">
+		{(['all', 'changed', 'new', 'renamed', 'deleted'] as const).map((status) => (
+			<button
+				type="button"
+				class="status-filter-button rounded-md border px-3 py-1"
+				style="border-color: var(--line); background: var(--paper-raised); color: var(--ink);"
+				data-status={status}
+				aria-pressed={status === 'all' ? 'true' : 'false'}
+			>
+				{{ all: 'すべて', changed: '変更', new: '新設', renamed: '改番', deleted: '削除' }[status]}
+			</button>
 		))}
+	</div>
+
+	<ul class="divide-y border-t border-b" style="border-color: var(--line);">
+		{changedArticles.map((entry) => {
+			const status = entry.data.is_new ? 'new' : entry.data.renamed_from && entry.data.renamed_from !== entry.data.id ? 'renamed' : 'changed';
+			return (
+				<li class="flex items-start gap-3 py-3" data-status={status}>
+					<span class="mt-1.5 inline-block h-3 w-3 shrink-0 rounded-full" style="background: var(--danger);" aria-hidden="true" />
+					<div>
+						<a href={`${base}drafts/${draft.id}/${entry.data.id}`} class="no-underline hover:underline">
+							<span class="font-mincho text-lg" style="color: var(--ink);">{entry.data.title}</span>
+						</a>
+						<p class="font-mono mt-1 text-xs" style="color: var(--ink-muted);">
+							{entry.data.renamed_from && entry.data.renamed_from !== entry.data.id
+								? `${articleLabel(entry.data.renamed_from)} → ${articleLabel(entry.data.id)}`
+								: articleLabel(entry.data.id)}
+						</p>
+					</div>
+				</li>
+			);
+		})}
 		{deletedArticles.map((entry) => (
-			<li class="flex items-start gap-3 py-3">
+			<li class="flex items-start gap-3 py-3" data-status="deleted">
 				<span class="mt-1.5 inline-block h-3 w-3 shrink-0 rounded-full" style="background: var(--ink-muted);" aria-hidden="true" />
 				<div>
 					<a href={`${base}drafts/${draft.id}/deleted/${entry.data.id}`} class="no-underline hover:underline">
@@ -92,4 +110,19 @@ const base = import.meta.env.BASE_URL;
 			</li>
 		))}
 	</ul>
+
+	<script>
+		const buttons = document.querySelectorAll<HTMLButtonElement>('.status-filter-button');
+		const items = document.querySelectorAll<HTMLElement>('li[data-status]');
+
+		for (const button of buttons) {
+			button.addEventListener('click', () => {
+				const status = button.dataset.status ?? 'all';
+				for (const b of buttons) b.setAttribute('aria-pressed', String(b === button));
+				for (const item of items) {
+					item.classList.toggle('hidden', status !== 'all' && item.dataset.status !== status);
+				}
+			});
+		}
+	</script>
 </BaseLayout>
