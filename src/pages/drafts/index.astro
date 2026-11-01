@@ -25,6 +25,7 @@ const base = import.meta.env.BASE_URL;
 					<p class="font-mono mt-1 text-xs" style="color: var(--ink-muted);">
 						<span class="tag">提案</span>
 						{' '}{draft.data.proposer}が {draft.data.published_at.toISOString().slice(0, 10)} に公表
+						{draft.data.status === 'outline' && <span class="tag ml-1">たたき台(未完成)</span>}
 					</p>
 				</div>
 			</li>

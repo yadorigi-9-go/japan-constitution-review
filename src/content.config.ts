@@ -118,6 +118,10 @@ const drafts = defineCollection({
     published_at: z.coerce.date(),
     source_url: z.string().url(),
     retrieved_at: z.coerce.date(),
+    // formal: 正式な改正案として取りまとめられたもの(例: jimin-2012)。
+    // outline: 完成した条文ではない、たたき台・論点整理の段階のもの(例: jimin-2018)。
+    // 省略時は formal 扱い(既存データとの後方互換のため)。
+    status: z.enum(['formal', 'outline']).default('formal'),
   }),
 });
 
