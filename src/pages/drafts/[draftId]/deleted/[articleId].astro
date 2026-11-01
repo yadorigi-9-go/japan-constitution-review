@@ -1,6 +1,7 @@
 ---
 import { getCollection, getEntry, type CollectionEntry } from 'astro:content';
 import BaseLayout from '../../../../layouts/BaseLayout.astro';
+import CommentList from '../../../../components/CommentList.astro';
 import { articleLabel } from '../../../../lib/draftDiff';
 
 export async function getStaticPaths() {
@@ -26,6 +27,11 @@ const { draft, entry } = Astro.props;
 const current = await getEntry('articles', entry.data.id);
 const paragraphs = current && (current.data.kind === 'article' || current.data.kind === 'preamble') ? current.data.paragraphs : [];
 const base = import.meta.env.BASE_URL;
+
+// verified: false のコメントは公開しない (docs/design.md 10)
+const comments = (await getCollection('comments')).filter(
+  (comment) => comment.data.verified && comment.data.draft_id === draft.id && comment.data.article_ids.includes(entry.data.id),
+);
 ---
 
 <BaseLayout
@@ -57,4 +63,6 @@ const base = import.meta.env.BASE_URL;
 	<p class="font-mono mt-4 text-xs" style="color: var(--ink-muted);">
 		出典: <a href={entry.data.source_url}>{entry.data.source_url}</a> / 最終確認日: {entry.data.retrieved_at.toISOString().slice(0, 10)}
 	</p>
+
+	<CommentList comments={comments} heading="この削除についてのコメント" />
 </BaseLayout>
