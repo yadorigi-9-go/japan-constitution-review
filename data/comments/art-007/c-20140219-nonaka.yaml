@@ -1,0 +1,21 @@
+id: c-20140219-nonaka
+article_ids: [art-007]
+draft_id: null
+kind: speech
+claim_type: concern
+stance: oppose
+source_type: primary
+speaker:
+  name: "野中廣務"
+  role: "参考人(元内閣官房長官)"
+  party: "自由民主党(元)"
+date: 2014-02-19
+venue: "参議院 国の統治機構に関する調査会"
+excerpt: "問題は、解散権は内閣総理大臣の絶対的専権事項だとほとんどの政治家が思い込み、信じ切っておることでございます。そのことが解散権を濫用させる原因となり、議院内閣制の適切な機能の障害になっておると思うのでございます。"
+summary: "元内閣官房長官の野中廣務氏が参考人として、憲法第7条は内閣の助言と承認による天皇の国事行為として衆議院の解散を定めており、解散権を内閣総理大臣個人の専権事項とする規定はないと指摘した上で、解散権を総理の絶対的専権事項だと思い込む風潮が解散権の濫用を招き、議院内閣制の適切な機能を妨げていると述べた。"
+summary_source: ai
+source_url: "https://kokkai.ndl.go.jp/txt/118614290X00120140219/7"
+archive_url: ""
+accessed_at: 2026-11-01
+tags: ["衆議院の解散", "内閣総理大臣", "解散権の濫用"]
+verified: true
