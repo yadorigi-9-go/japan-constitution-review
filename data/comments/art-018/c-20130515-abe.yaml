@@ -1,0 +1,21 @@
+id: c-20130515-abe
+article_ids: [art-018]
+draft_id: jimin-2012
+kind: speech
+claim_type: interpretation
+stance: support
+source_type: primary
+speaker:
+  name: "安倍晋三"
+  role: "内閣総理大臣"
+  party: "自由民主党"
+date: 2013-05-15
+venue: "参議院予算委員会"
+excerpt: "徴兵制については、現憲法でも今引いた条文において規定されているわけでありますし、また、同じ十八条で、それは自民党憲法においてもそのまま、ほぼそのまま残っておりますので、自民党憲法においてもそれは、徴兵制度については認められないという考え方であります。"
+summary: "安倍晋三内閣総理大臣(自民党総裁)が、小川敏夫議員の質問に対し、2012年改憲草案においても18条の苦役禁止規定はほぼそのまま維持されており、国を守る義務を理由とした徴兵制は自民党の改正案でも認められないとの考えを答弁した。"
+summary_source: ai
+source_url: "https://kokkai.ndl.go.jp/txt/118315261X01820130515/42"
+archive_url: ""
+accessed_at: 2026-11-02
+tags: ["第18条", "苦役", "徴兵制", "自民党2012年改憲草案"]
+verified: true
