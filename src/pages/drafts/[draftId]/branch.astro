@@ -133,6 +133,7 @@ const statusLabel = { changed: '変更', new: '新設', renamed: '改番', delet
 <BaseLayout
 	title={`${draft.data.name}(ブランチ) | 日本国憲法レビュー`}
 	description={`${draft.data.name}が成立した場合の日本国憲法の全条文一覧。`}
+	ogImage={`${base}og/drafts/${draft.id}.png`}
 >
 	<p class="font-mono mb-4 text-sm">
 		<a href={`${base}drafts/${draft.id}`}>&larr; {draft.data.name}</a>
