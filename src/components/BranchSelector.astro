@@ -11,11 +11,11 @@ const base = import.meta.env.BASE_URL;
 const drafts = await getCollection('drafts');
 ---
 
-<div class="font-mono mb-6 flex items-center gap-2 text-sm">
-	<label for="branch-select" style="color: var(--ink-muted);">ブランチ:</label>
+<div class="font-mono mb-6 flex items-center gap-2 text-sm" style="min-width: 0;">
+	<label for="branch-select" style="color: var(--ink-muted); flex-shrink: 0;">ブランチ:</label>
 	<select
 		id="branch-select"
-		class="rounded-md border px-2 py-1"
+		class="min-w-0 flex-1 truncate rounded-md border px-2 py-1"
 		style="border-color: var(--line); background: var(--paper-raised); color: var(--ink);"
 	>
 		<option value={base} selected={current === 'main'}>main(現行憲法)</option>
