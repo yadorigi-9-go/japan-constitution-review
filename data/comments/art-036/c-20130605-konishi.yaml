@@ -1,0 +1,21 @@
+id: c-20130605-konishi
+article_ids: [art-036]
+draft_id: jimin-2012
+kind: speech
+claim_type: fact
+stance: oppose
+source_type: primary
+speaker:
+  name: "小西洋之"
+  role: "参議院議員"
+  party: "民主党・新緑風会"
+date: 2013-06-05
+venue: "参議院憲法審査会"
+excerpt: "この自民党草案の話で恐縮なんですけど、憲法三十六条で公務員は絶対に拷問等をしてはいけないという規定がありますが、その絶対にという言葉を削除しています。"
+summary: "民主党・新緑風会の小西洋之参議院議員が、自民党の2012年改憲草案が36条から「絶対に」の文言を削除していることを指摘し、安倍総理(当時)がその理由を「GHQが押し付けた言葉だから」と答弁したことを国会で問題視した。"
+summary_source: ai
+source_url: "https://kokkai.ndl.go.jp/txt/118314183X00520130605/42"
+archive_url: ""
+accessed_at: 2026-11-02
+tags: ["第36条", "拷問等禁止", "自民党2012年改憲草案"]
+verified: true
