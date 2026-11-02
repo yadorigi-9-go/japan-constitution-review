@@ -11,18 +11,34 @@ const base = import.meta.env.BASE_URL;
 		<a href={base}>&larr; トップへ戻る</a>
 	</p>
 	<h1 class="font-mincho mb-3 text-xl" style="color: var(--ink);">検索</h1>
-	<p class="mb-6 text-sm" style="color: var(--ink-muted);">
-		条文・改憲案を全文検索できます(開発中のため
-		<code class="font-mono">npm run build</code>
-		後の <code class="font-mono">npm run preview</code> でのみ動作します。
-		<code class="font-mono">npm run dev</code> では索引が生成されません)。
-	</p>
+	{import.meta.env.DEV ? (
+		<p class="mb-6 text-sm" style="color: var(--ink-muted);">
+			条文・改憲案を全文検索できます(ローカル開発時は索引が未生成のため、
+			<code class="font-mono">npm run build</code>
+			後の <code class="font-mono">npm run preview</code> で確認してください。
+			<code class="font-mono">npm run dev</code> では動作しません)。
+		</p>
+	) : (
+		<p class="mb-6 text-sm" style="color: var(--ink-muted);">条文・改憲案を全文検索できます。</p>
+	)}
 	<div id="search"></div>
 	<script is:inline src={`${base}pagefind/pagefind-ui.js`}></script>
 	<script is:inline>
 		window.addEventListener('DOMContentLoaded', () => {
 			if (typeof PagefindUI === 'undefined') return;
-			new PagefindUI({ element: '#search', showSubResults: true });
+			new PagefindUI({
+				element: '#search',
+				showSubResults: true,
+				// 日本語など単語分割できない言語は1文字単位のAND検索になり、
+				// 「9条」が「90条」等にもマッチしてしまう。スペースを含まない
+				// 入力は完全一致(引用符)検索に変換してノイズを減らす。
+				processTerm: (term) => {
+					const trimmed = term.trim();
+					if (!trimmed || /\s/.test(trimmed)) return term;
+					if (trimmed.startsWith('"') && trimmed.endsWith('"')) return term;
+					return `"${trimmed}"`;
+				},
+			});
 
 			// ?q=<発言者名> 等で来た場合、Pagefind UI の検索欄に自動入力する
 			// (issue #81: CommentList の発言者名からの検索導線)。
