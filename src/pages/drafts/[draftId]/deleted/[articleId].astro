@@ -28,9 +28,28 @@ const current = await getEntry('articles', entry.data.id);
 const paragraphs = current && (current.data.kind === 'article' || current.data.kind === 'preamble') ? current.data.paragraphs : [];
 const base = import.meta.env.BASE_URL;
 
+// この削除される条文番号に、別の現行条文からの改番で同じ番号の条文が新設されることが
+// ある(例: 現行97条の削除と、現行95条からの改番による新97条。design.md 5.2)。この
+// とき、改番後の条文(art-XXX.yaml)と削除(del-art-XXX.yaml)とで id(番号)が衝突
+// する。改番後の条文へのコメントは 5.5節の規約により article_ids に改番前・改番後
+// 両方のidを含むため、改番前のidも含むコメントは衝突側(削除)のものではないとみなし、
+// ここでは除外する。
+const draftArticles = await getCollection('draftArticles');
+const collidingRename = draftArticles.find(
+  (a) =>
+    a.id.startsWith(`${draft.id}/`) &&
+    a.data.id === entry.data.id &&
+    a.data.renamed_from &&
+    a.data.renamed_from !== a.data.id,
+);
+
 // verified: false のコメントは公開しない (docs/design.md 10)
 const comments = (await getCollection('comments')).filter(
-  (comment) => comment.data.verified && comment.data.draft_id === draft.id && comment.data.article_ids.includes(entry.data.id),
+  (comment) =>
+    comment.data.verified &&
+    comment.data.draft_id === draft.id &&
+    comment.data.article_ids.includes(entry.data.id) &&
+    !(collidingRename && comment.data.article_ids.includes(collidingRename.data.renamed_from!)),
 );
 ---
 
