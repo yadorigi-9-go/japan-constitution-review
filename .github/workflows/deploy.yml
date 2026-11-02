@@ -34,10 +34,8 @@ jobs:
           path: dist
 
   # main への push 時のみ GitHub Pages に公開する (pull_request では公開しない)。
-  # リポジトリがまだ private で Pages を有効化していないため、一時的に無効化中。
-  # 再度有効にするときは下の `false &&` を外す。
   deploy:
-    if: false && github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     needs: build
     runs-on: ubuntu-latest
     environment:
