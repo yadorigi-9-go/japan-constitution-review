@@ -37,6 +37,7 @@ const comments = (await getCollection('comments')).filter(
 <BaseLayout
 	title={`${row.title} | ${draft.data.name} | 日本国憲法レビュー`}
 	description={`${draft.data.name}による${row.title}の変更内容(現行憲法との差分)。`}
+	ogImage={`${base}og/drafts/${draft.id}/${entry.data.id}.png`}
 >
 	<p class="font-mono mb-4 text-sm">
 		<a href={`${base}drafts/${draft.id}`}>&larr; {draft.data.name}</a>

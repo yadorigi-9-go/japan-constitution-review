@@ -4,14 +4,18 @@ import '../styles/global.css';
 interface Props {
 	title: string;
 	description?: string;
+	// base からの相対パス(例: "og/articles/art-009.png")。省略時はサイト共通画像を使う
+	// (docs/design.md 9節、条文・改憲案ごとのOGP画像自動生成)。
+	ogImage?: string;
 }
 
 const defaultDescription =
 	'日本国憲法と改憲案の論点・リスクを、コードレビュー形式で検証する非公式サイト。';
-const { title, description = defaultDescription } = Astro.props;
+const { title, description = defaultDescription, ogImage } = Astro.props;
 const base = import.meta.env.BASE_URL;
 const path = Astro.url.pathname;
 const canonicalURL = new URL(path, Astro.site);
+const ogImageURL = new URL(ogImage ?? `${base}og/default.png`, Astro.site);
 const isActive = (segment: string) => path === `${base}${segment}` || path.startsWith(`${base}${segment}/`);
 const tabs = [
 	{ href: base, label: '条文', icon: '📄', active: path === base || path.startsWith(`${base}articles/`) },
@@ -37,9 +41,13 @@ const tabs = [
 		<meta property="og:title" content={title} />
 		<meta property="og:description" content={description} />
 		<meta property="og:url" content={canonicalURL} />
-		<meta name="twitter:card" content="summary" />
+		<meta property="og:image" content={ogImageURL} />
+		<meta property="og:image:width" content="1200" />
+		<meta property="og:image:height" content="630" />
+		<meta name="twitter:card" content="summary_large_image" />
 		<meta name="twitter:title" content={title} />
 		<meta name="twitter:description" content={description} />
+		<meta name="twitter:image" content={ogImageURL} />
 		<slot name="head" />
 		<script is:inline>
 			// ちらつき防止のため、スタイル適用前に同期的にテーマを決定する。
