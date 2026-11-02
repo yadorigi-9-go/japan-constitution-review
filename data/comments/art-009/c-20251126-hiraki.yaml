@@ -1,0 +1,21 @@
+id: c-20251126-hiraki
+article_ids: [art-009]
+draft_id: null
+kind: speech
+claim_type: interpretation
+stance: oppose
+source_type: primary
+speaker:
+  name: "平木大作"
+  role: "参議院議員"
+  party: "公明党"
+date: 2025-11-26
+venue: "参議院憲法審査会"
+excerpt: "公明党は、憲法九条一項、二項を今後とも堅持すべきであることを述べまして、意見表明とさせていただきます。"
+summary: "公明党の平木大作参議院議員が、9条1項の国際平和の希求、2項の戦力不保持・交戦権否認が戦後日本の歩みを体現してきたとし、同条を今後も堅持すべきだという党の立場を述べた。"
+summary_source: ai
+source_url: "https://kokkai.ndl.go.jp/txt/121914183X00120251126/30"
+archive_url: ""
+accessed_at: 2026-11-03
+tags: ["第9条", "安全保障", "公明党"]
+verified: true
