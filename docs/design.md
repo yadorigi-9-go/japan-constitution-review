@@ -3,8 +3,8 @@
 日本国憲法と改憲案の論点・リスクを、コードレビュー形式で検証するサイトの設計をまとめた資料です。
 現時点の設計案であり、実装を進める中で更新します。
 
-- 最終更新: 2026-11-01
-- ステータス: 設計案(`data/articles/` 、`data/drafts/` ともにスキーマは確定。13の未決事項を除く)
+- 最終更新: 2026-11-02
+- ステータス: 設計案(`data/articles/` 、`data/drafts/` ともにスキーマは確定。13の未決事項を除く)。2026-11-02にリポジトリをpublic化しGitHub Pagesで公開済み(SNS告知は2026-11-03予定)
 
 ---
 
@@ -299,13 +299,14 @@ GitHub Actions で次を自動化する。
 | スキーマ検証 | YAML の必須項目・列挙値を検証 | 実装済み(`npm run build` が Zod によるスキーマ検証を兼ねる。`.github/workflows/deploy.yml` の `build` ジョブで push・PR 時に実行) |
 | リンク切れチェック | `source_url` と `archive_url` を定期確認 | 実装済み(`scripts/check_links.py` / `npm run check:links`。`.github/workflows/check-links.yml` で毎週実行) |
 | 未確認データの除外 | `verified: false` のコメントは公開しない | 実装済み(各ページ側で `comment.data.verified` をフィルタ) |
-| ビルド・デプロイ | main へのマージで GitHub Pages に公開 | ワークフロー自体は実装済みだが、リポジトリが private かつ GitHub Pages 未有効化のため `deploy` ジョブは一時的に無効化中(`.github/workflows/deploy.yml`) |
+| ビルド・デプロイ | main へのマージで GitHub Pages に公開 | 実装済み。リポジトリをpublic化しGitHub Pagesを有効化したため、`deploy` ジョブを再有効化済み(`.github/workflows/deploy.yml`、2026-11-02) |
 
 - 改憲をめぐる議論は動きやすいため、各ページに「最終確認日」を表示し、定期的に更新する。
 - 変更はプルリクエストでレビューし、出典の確認を必須にする。(2026-11-01 よりブランチ+PRでの運用に変更)
 - 実発言コメント収集の進捗は GitHub Project(条文ごとの Issue を親issueの sub-issue として管理)で追跡する。検索・ローマ字表記の確認方法は5.5節を参照。コメント収集タスクに限り、内容をチャットで提示すれば承認を待たずに branch 作成〜commit〜push〜PR作成まで進めてよい(CLAUDE.md参照、2026-11-01)。
 - 条ごとのコメント収集issueのタイトルには、改憲案のdraft idを `[draft-id]` の形式で先頭に付ける(例: `[jimin-2018] 第9条の2(自衛隊明記・新設)への実発言収集`)。同じ条文idでも改憲案によって内容が全く異なる場合がある(例: `art-009-2` は jimin-2012 では「国防軍の新設」、jimin-2018 では「自衛隊明記」)ため、タイトルだけで区別できるようにする(2026-11-01)。
 - 外部からの実発言コメントの追加方法(手元のAIアシスタント向けプロンプトを含む)は [CONTRIBUTING.md](../CONTRIBUTING.md) を参照(2026-11-01)。GitHub Actions等による自動下書き生成は、secretsの管理やフォークPRへの安全性の懸念から見送った([#76](https://github.com/yadorigi-9-go/japan-constitution-review/issues/76))。
+- public化に伴い、main への直接pushを禁止しPRとCI(buildジョブ)のpass・最新化を必須とするbranch protectionを設定。あわせてSecret scanning / push protection、Dependabot alerts、Private vulnerability reportingを有効化した(2026-11-02)。
 
 ---
 
@@ -317,7 +318,7 @@ GitHub Actions で次を自動化する。
 ### バージョニング
 
 - [Semantic Versioning](https://semver.org/) に従う(`package.json` の `version`)。
-- 公開開始(予定: 2026-11-03)時点のバージョンを `0.1.0` とする(2026-11-01)。
+- 公開開始(予定: 2026-11-03、SNS告知)時点のバージョンを `0.1.0` とする(2026-11-01)。なお、GitHub Pagesでの実際の公開自体は2026-11-02に先行して完了している。
 - `0.x`系の間は互換性を保証しない(SemVerの定義どおり)。
   - MINOR: 新機能の追加、新しい改憲案の追加など、機能・対象範囲の実質的な拡張時に上げる。
   - PATCH: バグ修正など。`data/comments/` への日常的な発言追加のみでは上げない(頻度が高すぎるため)。
@@ -329,10 +330,10 @@ GitHub Actions で次を自動化する。
 
 1. スキーマ確定、サンプル条文(数条)で表示を試作 — 完了
 2. 条文の一括取得と全条文ページの生成 — 完了(104条文)
-3. コメント表示(行コメント風UI) — UIは完了。データは実在の発言を条文ごとに収集中(2026-11-01時点で38件、21条文をカバー。GitHub Projectで進捗管理)
+3. コメント表示(行コメント風UI) — UIは完了。データは実在の発言を条文ごとに収集中(2026-11-02時点で53件、30条文をカバー。GitHub Projectで進捗管理)
 4. 改憲案の差分表示(PR風UI) — 完了。jimin-2012案(2012年、全11章にわたり実質的変更を網羅)に加え、jimin-2018案(2018年「条文イメージ(たたき台素案)」、4項目7条文)も追加(2026-11-01)
 5. 論点一覧(Issues 風)、全文検索 — 全文検索(Pagefind)は完了。論点一覧は13の未決事項により保留中
-6. 公開、SEO 設定、CI の整備 — SEO・CIの仕組みは実装済み。公開(GitHub Pages有効化・リポジトリpublic化)は未実施
+6. 公開、SEO 設定、CI の整備 — 完了。SEO(OGP画像の自動生成を含む)・CIの仕組みに加え、公開(GitHub Pages有効化・リポジトリpublic化)も2026-11-02に実施した。SNS告知は2026-11-03予定
 
 ## 13. 未決事項
 
@@ -340,4 +341,3 @@ GitHub Actions で次を自動化する。
 - 取り上げる改憲案の範囲と、各案の出典の確定。jimin-2012案は章単位で解決済み。自民党の2018年「条文イメージ(たたき台素案)」(jimin-2018、4項目のみの未完成案)も追加した(2026-11-01)。他党の改憲案を追加するかは引き続き未決
 - 独自ドメインの取得をするか
 - 論点一覧(`data/issues/`、ロードマップ5)の要否・実装時期。AIによる解説文章はバイアスの懸念があるため保留し、まずは実在の政治家の発言コメント(`data/comments/`)の収集を優先する方針に転換した(2026-11-01)
-- リポジトリをpublicにするタイミング(現在private。GitHub Pagesは private リポジトリでは有効化できないため、公開には連動する)
