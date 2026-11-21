@@ -57,6 +57,12 @@ const comments = (await getCollection('comments')).filter(
 	title={`${entry.data.title} | ${draft.data.name} | 日本国憲法レビュー`}
 	description={`${draft.data.name}により削除される${articleLabel(entry.data.id)}(${entry.data.title})。`}
 	ogImage={`${base}og/drafts/${draft.id}/deleted/${entry.data.id}.png`}
+	breadcrumb={[
+		{ name: '条文', href: base },
+		{ name: '改憲案', href: `${base}drafts` },
+		{ name: draft.data.name, href: `${base}drafts/${draft.id}` },
+		{ name: entry.data.title },
+	]}
 >
 	<p class="font-mono mb-4 text-sm">
 		<a href={`${base}drafts/${draft.id}`}>&larr; {draft.data.name}</a>
