@@ -73,7 +73,12 @@ for (const entry of await getCollection('draftDeletions')) {
 }
 ---
 
-<BaseLayout title={`${pageTitle} | 日本国憲法レビュー`} description={description} ogImage={`${base}og/articles/${article.id}.png`}>
+<BaseLayout
+	title={`${pageTitle} | 日本国憲法レビュー`}
+	description={description}
+	ogImage={`${base}og/articles/${article.id}.png`}
+	breadcrumb={[{ name: '条文', href: base }, { name: pageTitle }]}
+>
 	<p class="font-mono mb-4 text-sm">
 		<a href={base}>&larr; 条文一覧</a>
 	</p>
