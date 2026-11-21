@@ -63,6 +63,7 @@ const comments = (await getCollection('comments')).filter(
 		{ name: draft.data.name, href: `${base}drafts/${draft.id}` },
 		{ name: entry.data.title },
 	]}
+	pagefindFilters={{ 種類: '改憲案(削除)', 改憲案: draft.data.name }}
 >
 	<p class="font-mono mb-4 text-sm">
 		<a href={`${base}drafts/${draft.id}`}>&larr; {draft.data.name}</a>

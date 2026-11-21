@@ -37,6 +37,7 @@ const base = import.meta.env.BASE_URL;
 	description={`${draft.data.name}(${draft.data.proposer}提案)が現行憲法から変更する条文の一覧。`}
 	ogImage={`${base}og/drafts/${draft.id}.png`}
 	breadcrumb={[{ name: '条文', href: base }, { name: '改憲案', href: `${base}drafts` }, { name: draft.data.name }]}
+	pagefindFilters={{ 種類: '改憲案一覧', 改憲案: draft.data.name }}
 >
 	<p class="font-mono mb-4 text-sm">
 		<a href={`${base}drafts`}>&larr; 改憲案一覧</a>

@@ -16,11 +16,14 @@ interface Props {
 	// トップページからの階層(例: [{name: '改憲案', href: `${base}drafts`}, {name: '第9条の2'}])。
 	// BreadcrumbList の構造化データとして出力する(docs/design.md 9節)。
 	breadcrumb?: BreadcrumbItem[];
+	// 検索(Pagefind)のフィルタとして使うキーと値(例: {種類: '条文'})。
+	// data-pagefind-filter としてページに埋め込み、検索結果の絞り込みに使う(Issue #124)。
+	pagefindFilters?: Record<string, string>;
 }
 
 const defaultDescription =
 	'日本国憲法と改憲案の論点・リスクを、コードレビュー形式で検証する非公式サイト。';
-const { title, description = defaultDescription, ogImage, breadcrumb } = Astro.props;
+const { title, description = defaultDescription, ogImage, breadcrumb, pagefindFilters } = Astro.props;
 const base = import.meta.env.BASE_URL;
 const path = Astro.url.pathname;
 const canonicalURL = new URL(path, Astro.site);
@@ -139,6 +142,10 @@ const tabs = [
 			});
 		</script>
 		<main class="mx-auto max-w-4xl px-4 py-6">
+			{pagefindFilters &&
+				Object.entries(pagefindFilters).map(([key, value]) => (
+					<span class="hidden" data-pagefind-filter={`${key}:${value}`} />
+				))}
 			<slot />
 		</main>
 	</body>
