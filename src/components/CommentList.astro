@@ -1,13 +1,17 @@
 ---
 import type { CollectionEntry } from 'astro:content';
 import { linkifyArticleRefs } from '../lib/articleLinks';
+import { resolveCommentTarget } from '../lib/commentLinks';
 
 interface Props {
 	comments: CollectionEntry<'comments'>[];
 	heading: string;
+	// true の場合、各コメントが元の条文・改憲案ページへのリンクを表示する
+	// (タグ別一覧など、複数の条文のコメントを横断して表示するページで使う。Issue #125)。
+	showContext?: boolean;
 }
 
-const { comments, heading } = Astro.props;
+const { comments, heading, showContext = false } = Astro.props;
 const base = import.meta.env.BASE_URL;
 
 const stanceLabel = { support: '賛成', oppose: '反対', neutral: '中立' } as const;
@@ -20,6 +24,10 @@ const linkedText = await Promise.all(
 		summary: await linkifyArticleRefs(comment.data.summary, comment.data.draft_id, base),
 	})),
 );
+
+const contextLinks = showContext
+	? await Promise.all(comments.map((comment) => resolveCommentTarget(comment, base)))
+	: [];
 ---
 
 {comments.length > 0 && (
@@ -41,6 +49,11 @@ const linkedText = await Promise.all(
 					<div class="comment-card m-3" data-stance={comment.data.stance}>
 						<p class="mb-2 text-xs" style="color: var(--ink-muted);">
 							{comment.data.speaker.role} ・ {stanceLabel[comment.data.stance]} ・ {claimTypeLabel[comment.data.claim_type]}
+							{showContext && (
+								<>
+									{' '}・ <a href={contextLinks[i].href}>{contextLinks[i].label}</a>
+								</>
+							)}
 						</p>
 						<blockquote class="font-mincho mb-2 border-l-2 pl-3" style="border-color: var(--line); color: var(--ink);" set:html={linkedText[i].excerpt} />
 						<p class="mb-1 flex items-center gap-1.5 text-xs" style="color: var(--ink-muted);">
@@ -56,6 +69,15 @@ const linkedText = await Promise.all(
 								</>
 							)}
 						</p>
+						{comment.data.tags.length > 0 && (
+							<p class="mt-2 flex flex-wrap gap-1">
+								{comment.data.tags.map((tag) => (
+									<a href={`${base}tags/${encodeURIComponent(tag)}`} class="tag no-underline hover:underline">
+										{tag}
+									</a>
+								))}
+							</p>
+						)}
 					</div>
 				</li>
 			))}

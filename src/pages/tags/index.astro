@@ -1,0 +1,49 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+const base = import.meta.env.BASE_URL;
+
+// verified: false のコメントは集計に含めない(docs/design.md 10)
+const comments = (await getCollection('comments')).filter((comment) => comment.data.verified);
+
+const countByTag = new Map<string, number>();
+for (const comment of comments) {
+	for (const tag of comment.data.tags) {
+		countByTag.set(tag, (countByTag.get(tag) ?? 0) + 1);
+	}
+}
+
+const tags = [...countByTag.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
+---
+
+<BaseLayout
+	title="タグ一覧 | 日本国憲法レビュー"
+	description="実発言コメントに付けられたタグの一覧。論点・キーワードごとに関連する発言を横断的に確認できます。"
+	breadcrumb={[{ name: '条文', href: base }, { name: 'タグ' }]}
+	pagefindFilters={{ 種類: 'タグ一覧' }}
+>
+	<p class="font-mono mb-4 text-sm">
+		<a href={base}>&larr; 条文一覧</a>
+	</p>
+	<h1 class="font-mincho mb-2 text-xl" style="color: var(--ink);">タグ一覧</h1>
+	<p class="mb-6 text-sm leading-relaxed" style="color: var(--ink);">
+		実発言コメントに付けられたタグです。条文をまたいで、同じ論点・キーワードに関する発言を確認できます
+		(特定の政治家の発言をまとめたページではありません)。
+	</p>
+
+	{tags.length === 0 ? (
+		<p class="text-sm" style="color: var(--ink-muted);">タグの付いたコメントはまだありません。</p>
+	) : (
+		<ul class="flex flex-wrap gap-2">
+			{tags.map(([tag, count]) => (
+				<li>
+					<a href={`${base}tags/${encodeURIComponent(tag)}`} class="tag no-underline hover:underline">
+						{tag}
+						<span class="font-mono ml-1" style="color: var(--ink-muted);">{count}</span>
+					</a>
+				</li>
+			))}
+		</ul>
+	)}
+</BaseLayout>
