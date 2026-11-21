@@ -1,0 +1,42 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import CommentList from '../../components/CommentList.astro';
+
+export async function getStaticPaths() {
+	const comments = (await getCollection('comments')).filter((comment) => comment.data.verified);
+	const tags = new Set<string>();
+	for (const comment of comments) {
+		for (const tag of comment.data.tags) tags.add(tag);
+	}
+	return [...tags].map((tag) => ({
+		params: { tag },
+		props: { tag, comments: comments.filter((comment) => comment.data.tags.includes(tag)) },
+	}));
+}
+
+interface Props {
+	tag: string;
+	comments: Awaited<ReturnType<typeof getCollection<'comments'>>>;
+}
+
+const { tag, comments } = Astro.props;
+const sortedComments = [...comments].sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
+const base = import.meta.env.BASE_URL;
+---
+
+<BaseLayout
+	title={`${tag} | タグ | 日本国憲法レビュー`}
+	description={`「${tag}」タグが付いた実発言コメントの一覧。`}
+	breadcrumb={[{ name: '条文', href: base }, { name: 'タグ', href: `${base}tags` }, { name: tag }]}
+	pagefindFilters={{ 種類: 'タグ' }}
+>
+	<p class="font-mono mb-4 text-sm">
+		<a href={`${base}tags`}>&larr; タグ一覧</a>
+	</p>
+	<h1 class="font-mincho mb-6 text-xl" style="color: var(--ink);">
+		<span class="tag align-middle">{tag}</span>
+	</h1>
+
+	<CommentList comments={sortedComments} heading="このタグが付いたコメント" showContext />
+</BaseLayout>

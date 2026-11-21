@@ -78,6 +78,7 @@ for (const entry of await getCollection('draftDeletions')) {
 	description={description}
 	ogImage={`${base}og/articles/${article.id}.png`}
 	breadcrumb={[{ name: '条文', href: base }, { name: pageTitle }]}
+	pagefindFilters={{ 種類: '条文' }}
 >
 	<p class="font-mono mb-4 text-sm">
 		<a href={base}>&larr; 条文一覧</a>
