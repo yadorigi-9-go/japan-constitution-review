@@ -140,6 +140,7 @@ const statusLabel = { changed: '変更', new: '新設', renamed: '改番', delet
 		{ name: draft.data.name, href: `${base}drafts/${draft.id}` },
 		{ name: 'ブランチ' },
 	]}
+	pagefindFilters={{ 種類: '改憲案(ブランチ)', 改憲案: draft.data.name }}
 >
 	<p class="font-mono mb-4 text-sm">
 		<a href={`${base}drafts/${draft.id}`}>&larr; {draft.data.name}</a>
