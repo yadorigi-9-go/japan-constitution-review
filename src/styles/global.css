@@ -139,3 +139,26 @@ del {
 .theme-toggle:hover {
 	background: var(--line);
 }
+
+/* キーボード操作時のフォーカスを常に見えるようにする(アクセシビリティ対応)。 */
+:focus-visible {
+	outline: 2px solid var(--link);
+	outline-offset: 2px;
+}
+
+/* メインコンテンツへのスキップリンク。通常は視覚的に隠し、キーボードフォーカス時のみ表示する。 */
+.skip-link {
+	position: absolute;
+	left: -9999px;
+	top: 0;
+	z-index: 100;
+	padding: 0.5rem 1rem;
+	background: var(--paper);
+	color: var(--ink);
+	border: 1px solid var(--line);
+	border-radius: 0 0 6px 0;
+}
+
+.skip-link:focus {
+	left: 0;
+}
