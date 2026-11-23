@@ -1,0 +1,83 @@
+---
+// kind: embed のコメント用、クリック時読み込みの埋め込み (docs/design.md 8節、Issue #136)。
+// 表示速度とプライバシーのため、クリックするまで外部スクリプト・iframeを読み込まない。
+import { detectEmbed } from '../lib/embed';
+
+interface Props {
+	url: string;
+}
+
+const { url } = Astro.props;
+const embed = detectEmbed(url);
+const providerLabel = embed?.provider === 'youtube' ? 'YouTube' : embed?.provider === 'twitter' ? 'X(旧Twitter)' : '';
+---
+
+{embed && (
+	<div
+		class="click-to-load-embed rounded-md border p-3 text-center"
+		style="border-color: var(--line); background: var(--paper-raised);"
+		data-embed-provider={embed.provider}
+		data-embed-id={embed.id}
+		data-embed-url={url}
+	>
+		<button type="button" class="font-mono text-sm underline" style="color: var(--link); background: none; border: none; cursor: pointer;">
+			{providerLabel}の埋め込みを読み込む
+		</button>
+		<p class="font-mono mt-1 text-xs" style="color: var(--ink-muted);">
+			クリックすると{providerLabel}から埋め込みコンテンツを読み込みます(投稿が削除された場合は上記の出典リンクを参照してください)。
+		</p>
+	</div>
+)}
+
+<script>
+	declare global {
+		interface Window {
+			twttr?: { widgets?: { load?: (el?: HTMLElement) => void } };
+		}
+	}
+
+	function loadEmbed(container: HTMLElement) {
+		const { embedProvider: provider, embedId: id, embedUrl: url } = container.dataset;
+		if (!provider || !id || !url) return;
+
+		if (provider === 'youtube') {
+			container.innerHTML = '';
+			const iframe = document.createElement('iframe');
+			iframe.width = '100%';
+			iframe.height = '315';
+			iframe.src = `https://www.youtube-nocookie.com/embed/${id}`;
+			iframe.title = 'YouTube video';
+			iframe.loading = 'lazy';
+			iframe.allow = 'encrypted-media; picture-in-picture';
+			iframe.style.border = '0';
+			container.appendChild(iframe);
+			return;
+		}
+
+		if (provider === 'twitter') {
+			container.innerHTML = '';
+			const blockquote = document.createElement('blockquote');
+			blockquote.className = 'twitter-tweet';
+			const link = document.createElement('a');
+			link.href = url;
+			blockquote.appendChild(link);
+			container.appendChild(blockquote);
+
+			const existingScript = document.querySelector<HTMLScriptElement>('script[data-twitter-widgets]');
+			if (!existingScript) {
+				const script = document.createElement('script');
+				script.src = 'https://platform.twitter.com/widgets.js';
+				script.async = true;
+				script.dataset.twitterWidgets = 'true';
+				document.body.appendChild(script);
+			} else {
+				window.twttr?.widgets?.load?.(container);
+			}
+		}
+	}
+
+	document.querySelectorAll<HTMLElement>('.click-to-load-embed').forEach((container) => {
+		const button = container.querySelector('button');
+		button?.addEventListener('click', () => loadEmbed(container), { once: true });
+	});
+</script>

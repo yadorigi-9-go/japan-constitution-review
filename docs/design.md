@@ -271,7 +271,7 @@ GitHub のUIを参考にする。配色・部品だけでなく、ヘッダー�
 - 個人ブログ・YouTube・SNS(X等)への投稿も、国会発言と同様に `data/comments/` の出典として扱える(2026-11-01、スキーマは対応済み)。
   - `source_url` は URL形式を強制していないため、会議録URL以外(ブログURL、動画URL、投稿URL)でもそのまま使える。
   - 政治家本人による発信は `source_type: self` とし、一次資料(`primary`、主に会議録)とは区別する。
-  - `kind: embed` のコメントをクリック時読み込みの埋め込みとして表示するUIは、実際の埋め込みデータが揃ってから別途実装する([#80](https://github.com/yadorigi-9-go/japan-constitution-review/issues/80))。それまでは `kind: speech`(発言の抜粋)と同様に、短い抜粋 + 出典リンクの形式で扱う。
+  - `kind: embed` のコメントは、クリック時読み込みの埋め込みコンポーネント(`source_url` がYouTube/X(旧Twitter)のURLと一致する場合のみ)として表示する — 実装済み(`src/components/ClickToLoadEmbed.astro`、Issue #136、2026-11-23)。それ以外のURLや対象の実発言データが揃うまでは、`kind: speech`(発言の抜粋)と同様に、短い抜粋 + 出典リンクの形式で扱う。
 
 ### 表現上のルール
 
