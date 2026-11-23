@@ -8,10 +8,24 @@ on:
 
 permissions:
   contents: read
+  issues: write
 
 jobs:
   check-links:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - run: python3 scripts/check_links.py
+      - name: Run link check
+        id: check
+        continue-on-error: true
+        run: python3 scripts/check_links.py
+      # チェック結果 (リンク切れの有無) をIssue #133に報告する。
+      # data/link_check_report.json はコミットしないため、Actionsログを見に行かなくても
+      # 気づけるようにするための手当て (docs/design.md 10)。
+      - name: Report result to tracking issue
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/report_link_check.py
+      - name: Fail job if broken links were found
+        if: steps.check.outcome == 'failure'
+        run: exit 1
