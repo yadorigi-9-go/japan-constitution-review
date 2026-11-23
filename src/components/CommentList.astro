@@ -2,6 +2,7 @@
 import type { CollectionEntry } from 'astro:content';
 import { linkifyArticleRefs } from '../lib/articleLinks';
 import { resolveCommentTarget } from '../lib/commentLinks';
+import ClickToLoadEmbed from './ClickToLoadEmbed.astro';
 
 interface Props {
 	comments: CollectionEntry<'comments'>[];
@@ -56,6 +57,11 @@ const contextLinks = showContext
 							)}
 						</p>
 						<blockquote class="font-mincho mb-2 border-l-2 pl-3" style="border-color: var(--line); color: var(--ink);" set:html={linkedText[i].excerpt} />
+						{comment.data.kind === 'embed' && (
+							<div class="mb-2">
+								<ClickToLoadEmbed url={comment.data.source_url} />
+							</div>
+						)}
 						<p class="mb-1 flex items-center gap-1.5 text-xs" style="color: var(--ink-muted);">
 							要約
 							{comment.data.summary_source === 'ai' && <span class="tag">AIによる要約</span>}
