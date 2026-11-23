@@ -2,7 +2,8 @@
 import { getCollection, type CollectionEntry } from 'astro:content';
 import BaseLayout from '../../../layouts/BaseLayout.astro';
 import CommentList from '../../../components/CommentList.astro';
-import { articleLabel, computeDraftArticleDiff } from '../../../lib/draftDiff';
+import DraftArticleDiffCard from '../../../components/DraftArticleDiffCard.astro';
+import { computeDraftArticleDiff } from '../../../lib/draftDiff';
 
 export async function getStaticPaths() {
   const drafts = await getCollection('drafts');
@@ -62,34 +63,7 @@ const comments = (await getCollection('comments')).filter(
 		<a href={`${base}drafts/${draft.id}`}>&larr; {draft.data.name}</a>
 	</p>
 
-	<div class="overflow-hidden rounded-md border" style="border-color: var(--line);">
-		<div class="border-b px-4 py-3" style="border-color: var(--line); background: var(--paper-raised);">
-			<h1 class="font-mincho text-lg" style="color: var(--ink);">{row.title}</h1>
-			<p class="font-mono mt-1 flex items-center gap-2 text-sm" style="color: var(--ink-muted);">
-				{row.isRenamed && row.renamedFrom ? `${articleLabel(row.renamedFrom)} → ${articleLabel(row.id)}` : articleLabel(row.id)}
-				{row.isNew && <span class="tag tag-new">新設</span>}
-				{row.isRenamed && <span class="tag">改番</span>}
-			</p>
-		</div>
-		<div class="font-mono px-3 py-3 text-sm leading-relaxed">
-			{row.paragraphDiffs.map((pd) => (
-				<div class="flex gap-3 py-1">
-					<span class="shrink-0 text-right" style="width: 1.5rem; color: var(--ink-muted);">{pd.no}</span>
-					<p style="color: var(--ink);">
-						{pd.parts.map((part) =>
-							part.added ? (
-								<ins>{part.value}</ins>
-							) : part.removed ? (
-								<del>{part.value}</del>
-							) : (
-								<span>{part.value}</span>
-							),
-						)}
-					</p>
-				</div>
-			))}
-		</div>
-	</div>
+	<DraftArticleDiffCard row={row} />
 
 	<CommentList comments={comments} heading="この変更についてのコメント" />
 
