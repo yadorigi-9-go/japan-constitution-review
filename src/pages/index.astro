@@ -39,6 +39,9 @@ for (const article of articles) {
 // 章フィルタの選択肢(出現順、重複なし)。前文には章がないため含めない。
 const chapters = rows.map((row) => row.chapter).filter((chapter): chapter is string => chapter !== null);
 
+// コメント収集の進捗(docs/design.md ロードマップ3)。収集作業の優先順位付けに使う。
+const coveredArticleCount = articles.filter((article) => (commentCountByArticleId.get(article.id) ?? 0) > 0).length;
+
 const base = import.meta.env.BASE_URL;
 ---
 
@@ -53,6 +56,12 @@ const base = import.meta.env.BASE_URL;
 	</p>
 
 	<BranchSelector current="main" />
+
+	<p class="font-mono mb-6 text-xs" style="color: var(--ink-muted);">
+		実発言コメントのある条文: {coveredArticleCount} / {articles.length}(収集中。進捗は
+		<a href="https://github.com/yadorigi-9-go/japan-constitution-review/issues/16">Issue #16</a>
+		で管理)
+	</p>
 
 	<div class="mb-8 flex gap-4 font-mono text-sm">
 		<a class="rounded-md border px-3 py-1.5 no-underline hover:underline" style="border-color: var(--line);" href={`${base}drafts`}>改憲案一覧 →</a>
@@ -74,10 +83,18 @@ const base = import.meta.env.BASE_URL;
 				))}
 			</select>
 		</div>
-		<label class="flex items-center gap-1.5">
-			<input type="checkbox" id="comment-filter" />
-			コメントのある条文のみ
-		</label>
+		<div class="flex items-center gap-2">
+			<label for="comment-filter">コメント:</label>
+			<select
+				id="comment-filter"
+				class="rounded-md border px-2 py-1"
+				style="border-color: var(--line); background: var(--paper-raised); color: var(--ink);"
+			>
+				<option value="all">すべて</option>
+				<option value="with">あるものだけ</option>
+				<option value="without">まだないもの(収集対象)だけ</option>
+			</select>
+		</div>
 	</div>
 
 	<div class="border-t" style="border-color: var(--line);">
@@ -114,18 +131,20 @@ const base = import.meta.env.BASE_URL;
 
 	<script>
 		const chapterFilter = document.getElementById('chapter-filter') as HTMLSelectElement | null;
-		const commentFilter = document.getElementById('comment-filter') as HTMLInputElement | null;
+		const commentFilter = document.getElementById('comment-filter') as HTMLSelectElement | null;
 		const groups = document.querySelectorAll<HTMLElement>('[data-chapter-group]');
 
 		function applyFilters() {
 			const chapter = chapterFilter?.value ?? 'all';
-			const onlyWithComments = commentFilter?.checked ?? false;
+			const commentState = commentFilter?.value ?? 'all';
 			for (const group of groups) {
 				const chapterMatches = chapter === 'all' || group.dataset.chapterGroup === chapter;
 				let visibleCount = 0;
 				for (const li of group.querySelectorAll<HTMLElement>('li')) {
 					const count = Number(li.dataset.commentCount ?? '0');
-					const visible = chapterMatches && (!onlyWithComments || count > 0);
+					const commentMatches =
+						commentState === 'all' || (commentState === 'with' ? count > 0 : count === 0);
+					const visible = chapterMatches && commentMatches;
 					li.classList.toggle('hidden', !visible);
 					if (visible) visibleCount++;
 				}
