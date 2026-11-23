@@ -1,0 +1,100 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import DraftArticleDiffCard from '../../components/DraftArticleDiffCard.astro';
+import { computeDraftArticleDiff } from '../../lib/draftDiff';
+
+// 同じ条文id(枝番含む)に、複数の改憲案が触れている場合に並べて比較する(Issue #137)。
+// 対象は現時点で存在する改憲案(jimin-2012, jimin-2018)のみ。他党の改憲案を追加する場合の
+// より一般的な比較ビューは #103 で別途検討する。
+const drafts = (await getCollection('drafts')).sort(
+	(a, b) => a.data.published_at.getTime() - b.data.published_at.getTime(),
+);
+const draftById = new Map(drafts.map((draft) => [draft.id, draft]));
+const draftArticles = await getCollection('draftArticles');
+
+const entriesByArticleId = new Map<string, (typeof draftArticles)[number][]>();
+for (const entry of draftArticles) {
+	const list = entriesByArticleId.get(entry.data.id) ?? [];
+	list.push(entry);
+	entriesByArticleId.set(entry.data.id, list);
+}
+
+const sharedArticleIds = [...entriesByArticleId.keys()]
+	.filter((id) => (entriesByArticleId.get(id)?.length ?? 0) >= 2)
+	.sort((a, b) => {
+		const pa = a.match(/^art-(\d+)(?:-(\d+))?$/);
+		const pb = b.match(/^art-(\d+)(?:-(\d+))?$/);
+		if (!pa || !pb) return a.localeCompare(b);
+		const na = Number(pa[1]) * 1000 + Number(pa[2] ?? 0);
+		const nb = Number(pb[1]) * 1000 + Number(pb[2] ?? 0);
+		return na - nb;
+	});
+
+const comparisons = await Promise.all(
+	sharedArticleIds.map(async (articleId) => {
+		const entries = entriesByArticleId.get(articleId)!;
+		const columns = await Promise.all(
+			entries
+				.sort((a, b) => {
+					const [draftA] = a.id.split('/');
+					const [draftB] = b.id.split('/');
+					return (draftById.get(draftA)?.data.published_at.getTime() ?? 0) -
+						(draftById.get(draftB)?.data.published_at.getTime() ?? 0);
+				})
+				.map(async (entry) => {
+					const [draftId] = entry.id.split('/');
+					const draft = draftById.get(draftId)!;
+					return {
+						draftId,
+						row: await computeDraftArticleDiff(entry),
+						draftLabel: draft.data.name,
+						href: `${import.meta.env.BASE_URL}drafts/${draftId}/${entry.data.id}`,
+					};
+				}),
+		);
+		return { articleId, columns };
+	}),
+);
+
+const base = import.meta.env.BASE_URL;
+---
+
+<BaseLayout
+	title="改憲案の比較 | 日本国憲法レビュー"
+	description="同じ条文に複数の改憲案が触れている場合に、現行条文との差分を並べて比較します。"
+	breadcrumb={[{ name: '条文', href: base }, { name: '改憲案', href: `${base}drafts` }, { name: '比較' }]}
+	pagefindFilters={{ 種類: '改憲案比較' }}
+>
+	<p class="font-mono mb-4 text-sm">
+		<a href={`${base}drafts`}>&larr; 改憲案一覧</a>
+	</p>
+	<h1 class="font-mincho mb-2 text-xl" style="color: var(--ink);">改憲案の比較</h1>
+	<p class="font-mono mb-6 text-sm" style="color: var(--ink-muted);">
+		同じ条文(枝番含む)に複数の改憲案が触れている場合に、各案の現行条文との差分を並べて表示します。
+		対象は現時点の{drafts.length}案({drafts.map((d) => d.data.name).join('、')})のみです。
+	</p>
+
+	{comparisons.length === 0 ? (
+		<p class="font-mono text-sm" style="color: var(--ink-muted);">
+			現時点では、同じ条文に複数の改憲案が触れているケースはありません。
+		</p>
+	) : (
+		<div class="flex flex-col gap-8">
+			{comparisons.map(({ articleId, columns }) => (
+				<section>
+					<div class="grid gap-4" style={`grid-template-columns: repeat(${columns.length}, minmax(0, 1fr));`}>
+						{columns.map((column) => (
+							<DraftArticleDiffCard
+								row={column.row}
+								draftLabel={column.draftLabel}
+								href={column.href}
+								headingLevel="h2"
+							/>
+						))}
+					</div>
+				</section>
+			))}
+		</div>
+	)}
+</BaseLayout>

@@ -1,0 +1,47 @@
+---
+import { articleLabel, type computeDraftArticleDiff } from '../lib/draftDiff';
+
+interface Props {
+	row: Awaited<ReturnType<typeof computeDraftArticleDiff>>;
+	draftLabel?: string;
+	href?: string;
+	headingLevel?: 'h1' | 'h2';
+}
+
+const { row, draftLabel, href, headingLevel = 'h1' } = Astro.props;
+const Heading = headingLevel;
+---
+
+<div class="overflow-hidden rounded-md border" style="border-color: var(--line);">
+	<div class="border-b px-4 py-3" style="border-color: var(--line); background: var(--paper-raised);">
+		{draftLabel && (
+			<p class="font-mono mb-1 text-xs" style="color: var(--ink-muted);">{draftLabel}</p>
+		)}
+		<Heading class="font-mincho text-lg" style="color: var(--ink);">
+			{href ? <a href={href} class="no-underline hover:underline">{row.title}</a> : row.title}
+		</Heading>
+		<p class="font-mono mt-1 flex items-center gap-2 text-sm" style="color: var(--ink-muted);">
+			{row.isRenamed && row.renamedFrom ? `${articleLabel(row.renamedFrom)} → ${articleLabel(row.id)}` : articleLabel(row.id)}
+			{row.isNew && <span class="tag tag-new">新設</span>}
+			{row.isRenamed && <span class="tag">改番</span>}
+		</p>
+	</div>
+	<div class="font-mono px-3 py-3 text-sm leading-relaxed">
+		{row.paragraphDiffs.map((pd) => (
+			<div class="flex gap-3 py-1">
+				<span class="shrink-0 text-right" style="width: 1.5rem; color: var(--ink-muted);">{pd.no}</span>
+				<p style="color: var(--ink);">
+					{pd.parts.map((part) =>
+						part.added ? (
+							<ins>{part.value}</ins>
+						) : part.removed ? (
+							<del>{part.value}</del>
+						) : (
+							<span>{part.value}</span>
+						),
+					)}
+				</p>
+			</div>
+		))}
+	</div>
+</div>
