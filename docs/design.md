@@ -342,6 +342,10 @@ GitHub Actions で次を自動化する。
   - MINOR: 新機能の追加、新しい改憲案の追加など、機能・対象範囲の実質的な拡張時に上げる。
   - PATCH: バグ修正など。`data/comments/` への日常的な発言追加のみでは上げない(頻度が高すぎるため)。
 - `1.0.0` への到達条件は未定(13節の未決事項を参照)。
+- `package.json` の `version` は配布用ではなく(`"private": true` のため npm には公開されない)、サイトがどの段階かを示す目印として使う。
+- リリースの手順(2026-11-28、0.2.0 から運用):
+  1. 対象バージョンの GitHub マイルストーン(例: `0.2.0`)の Issue がすべて閉じたら、`release/<version>` ブランチで `package.json` / `package-lock.json` の `version` を上げ、PRでマージする。
+  2. マージ後の main に `v<version>` タグを付け、GitHub Releases にリリースノート(マイルストーンで閉じた Issue・PR の一覧)を作成し、マイルストーンを閉じる。
 
 ---
 
