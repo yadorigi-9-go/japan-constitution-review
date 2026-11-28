@@ -11,10 +11,12 @@ permissions:
   pages: write
   id-token: write
 
-# 同時に走った場合、最新のデプロイだけを残す。
+# 同じブランチ(PR)で同時に走った場合は、最新の実行だけを残す。
+# PRごとにグループを分け、別PRのビルドを打ち切らないようにする。
+# main への push(デプロイ)は打ち切らず、順番に実行する。
 concurrency:
-  group: pages
-  cancel-in-progress: true
+  group: pages-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   # YAML のスキーマ検証 (Zod) はビルド時に Astro が行うため、
