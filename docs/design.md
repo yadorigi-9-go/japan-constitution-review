@@ -323,7 +323,7 @@ GitHub Actions で次を自動化する。
   - `id` の姓は、既存データに同じ発言者がいればその表記を使う。いなければ `speakerYomi` 全体をローマ字化した仮のidにし、PR本文で姓のみへの修正を促す(読みから姓を推測で切り出さない。5.5節の3)。
 - **重複の処理**: 既存の `data/comments/` の `source_url`、未マージの候補PR(`auto/comment-candidates-*`)に含まれる `source_url`、`scripts/comment_collection_ignore.txt`(不採用にした候補のURL)と一致する発言は候補にしない。
 - **通知**: 候補がある場合のみ、`auto/comment-candidates-<日時>` ブランチを作成してPRを開く(PR本文に候補一覧と確認事項を記載)。候補がない場合はブランチ・PR・通知を作らない。
-- **失敗時の挙動**: APIリクエストは再試行(既定2回)し、それでも失敗した場合や `npm run build` によるスキーマ検証に失敗した場合は、ジョブを失敗させPRを作らない(GitHubの通常のワークフロー失敗通知で気づける)。リクエスト間隔は既定4秒(8節の利用規約)。
+- **失敗時の挙動**: APIリクエストは再試行(既定2回)し、それでも失敗した場合や `npm run build` によるスキーマ検証に失敗した場合は、ジョブを失敗させPRを作らない(GitHubの通常のワークフロー失敗通知で気づける)。候補ブランチのpush後にPR作成が失敗した場合(リポジトリ設定でActionsによるPR作成が許可されていない等)は、候補ブランチを削除してからジョブを失敗させ、原因と確認すべき設定をジョブのサマリーに出力する(ブランチだけが残ると、次回の実行で同じ候補のブランチが重複して作られるため。Issue #164)。リクエスト間隔は既定4秒(8節の利用規約)。
 - **権限**: `GITHUB_TOKEN` に `contents: write`(候補ブランチのpush)と `pull-requests: write`(PR作成)のみ付与する。リポジトリ設定の「Allow GitHub Actions to create and approve pull requests」を有効にする必要がある。
 - **CIについて**: `GITHUB_TOKEN` で作成したPRでは `deploy.yml` の `build` ジョブが起動しないため、ワークフロー内でPR作成前に `npm run build` を実行している。branch protection の必須チェックは、レビュー時に人が修正コミットをpushした時点(またはPRのclose/reopen)で実行される。
 
