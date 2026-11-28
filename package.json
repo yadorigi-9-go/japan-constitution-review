@@ -9,6 +9,7 @@
   "scripts": {
     "dev": "astro dev",
     "build": "python3 scripts/validate_comments.py && astro build && pagefind --site dist",
+    "check": "astro check",
     "preview": "astro preview",
     "astro": "astro",
     "fetch:articles": "python3 scripts/fetch_articles.py",
@@ -27,7 +28,9 @@
     "tailwindcss": "^4.3.3"
   },
   "devDependencies": {
-    "pagefind": "^1.5.2"
+    "@astrojs/check": "^0.9.12",
+    "pagefind": "^1.5.2",
+    "typescript": "^6.0.3"
   },
   "overrides": {
     "fflate": "^0.7.5"
