@@ -40,7 +40,7 @@
 | --- | --- | --- |
 | フレームワーク | Astro + TypeScript | 条文ごとの静的ページを事前生成でき、SEOに強い |
 | データ取得 | Python スクリプト | e-Gov 法令API、国会会議録検索APIからの取得・整形 |
-| 差分表示 | jsdiff + 自作コンポーネント(または diff2html) | 改憲案と現行条文の差分を PR 風に描画 |
+| 差分表示 | jsdiff + 自作コンポーネント(または diff2html) | 改憲案と現行条文の差分を PR 風に描画。`Intl.Segmenter('ja')` で語に分けて比較し(jsdiff の `diffWords` + `intlSegmenter`)、変更に挟まれた短い一致(ひらがな・句読点のみの2文字以下)は前後の変更に吸収する。1文字単位の比較で「公共の福祉」→「公益及び公の秩序」のような書き換えが細切れになるのを防ぐため。差分はビルド時に生成する(`src/lib/japaneseDiff.ts`、Issue #169、2026-11-28) |
 | 検索 | Pagefind | 静的サイト向け全文検索。サーバー不要 |
 | スタイル | Tailwind CSS(または GitHub Primer 風 CSS) | GitHub 風 UI を作りやすい |
 | ホスティング | GitHub Pages | 静的で完結。独自ドメインは後から追加可能 |
