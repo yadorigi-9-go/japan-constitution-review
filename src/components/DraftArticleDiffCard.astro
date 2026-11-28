@@ -5,7 +5,7 @@ interface Props {
 	row: Awaited<ReturnType<typeof computeDraftArticleDiff>>;
 	draftLabel?: string;
 	href?: string;
-	headingLevel?: 'h1' | 'h2';
+	headingLevel?: 'h1' | 'h2' | 'h3';
 }
 
 const { row, draftLabel, href, headingLevel = 'h1' } = Astro.props;

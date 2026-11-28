@@ -15,6 +15,7 @@
 - 開発: npm run dev / ビルド: npm run build
 - データ検証: npm run build(スキーマ検証) / npm run check:links(リンク切れチェック)
 - コメントのレビュー・認可: npm run review:comments(対話式CLI。source_url を開いて出典と照合し、verified を承認/却下する。`--all` で既存の verified: true も再チェック対象にできる)
+- コメント候補の収集: npm run collect:comments(国会会議録検索APIから候補を verified: false で data/comments/ に書き出す。`--dry-run` で書き出さずに確認。GitHub Actions で週1回自動実行し、候補があればPRを作成する)
 
 ## 厳守するルール
 

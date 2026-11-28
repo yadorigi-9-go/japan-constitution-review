@@ -1,0 +1,62 @@
+{
+  "$comment": "scripts/collect_comment_candidates.py の検索対象(Issue #159)。queries の各配列は国会会議録検索APIの any= に渡すAND検索の語。draft_mention_keywords のいずれかが発言本文に含まれる場合のみ draft_id/article_ids を設定し、含まれない場合は現行条文側(fallback_article_ids, draft_id: null)の候補にする(docs/design.md 5.5 の7・8)。meeting を省略した対象は default_meeting の会議に限定して検索する。",
+  "default_meeting": "憲法審査会",
+  "targets": [
+    {
+      "label": "[jimin-2018] 第9条の2(自衛隊明記)",
+      "draft_id": "jimin-2018",
+      "article_ids": ["art-009-2"],
+      "fallback_article_ids": ["art-009"],
+      "draft_mention_keywords": ["条文イメージ", "たたき台", "四項目", "４項目", "自衛隊明記", "自衛隊の明記"],
+      "queries": [["自衛隊", "明記"]]
+    },
+    {
+      "label": "[jimin-2018] 第26条(教育環境の整備)",
+      "draft_id": "jimin-2018",
+      "article_ids": ["art-026"],
+      "fallback_article_ids": ["art-026"],
+      "draft_mention_keywords": ["条文イメージ", "たたき台", "四項目", "４項目"],
+      "queries": [["教育環境", "整備"]]
+    },
+    {
+      "label": "[jimin-2018] 第47条(合区解消)",
+      "draft_id": "jimin-2018",
+      "article_ids": ["art-047"],
+      "fallback_article_ids": ["art-047"],
+      "draft_mention_keywords": ["条文イメージ", "たたき台", "四項目", "４項目"],
+      "queries": [["合区", "解消"]]
+    },
+    {
+      "label": "[jimin-2018] 第64条の2(選挙困難時の議員任期特例)",
+      "draft_id": "jimin-2018",
+      "article_ids": ["art-064-2"],
+      "fallback_article_ids": ["art-045"],
+      "draft_mention_keywords": ["条文イメージ", "たたき台", "四項目", "４項目"],
+      "queries": [["議員任期", "延長"]]
+    },
+    {
+      "label": "[jimin-2018] 第73条の2(緊急政令)",
+      "draft_id": "jimin-2018",
+      "article_ids": ["art-073-2"],
+      "fallback_article_ids": ["art-073"],
+      "draft_mention_keywords": ["条文イメージ", "たたき台", "四項目", "４項目"],
+      "queries": [["緊急政令"]]
+    },
+    {
+      "label": "[jimin-2018] 第89条(私学助成)",
+      "draft_id": "jimin-2018",
+      "article_ids": ["art-089"],
+      "fallback_article_ids": ["art-089"],
+      "draft_mention_keywords": ["条文イメージ", "たたき台", "四項目", "４項目"],
+      "queries": [["私学助成"]]
+    },
+    {
+      "label": "[jimin-2018] 第92条(地方公共団体の二層構造)",
+      "draft_id": "jimin-2018",
+      "article_ids": ["art-092"],
+      "fallback_article_ids": ["art-092"],
+      "draft_mention_keywords": ["条文イメージ", "たたき台", "四項目", "４項目"],
+      "queries": [["二層制"]]
+    }
+  ]
+}

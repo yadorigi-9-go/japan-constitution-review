@@ -1,0 +1,102 @@
+name: Collect comment candidates
+
+# 国会会議録検索APIから、改憲案の条文に関する実発言コメントの「候補」を収集し、
+# 候補があれば verified: false のまま Pull Request を作成する (Issue #159)。
+# 出典との照合・公開可否の判断は人が行う (npm run review:comments)。
+# 詳細は docs/design.md 10「コメント候補の定期収集」を参照。
+
+on:
+  schedule:
+    # 毎週水曜 01:00 UTC (10:00 JST) に実行する。
+    - cron: '0 1 * * 3'
+  workflow_dispatch:
+    inputs:
+      since:
+        description: 'この日付 (YYYY-MM-DD) 以降の発言を対象にする。空欄なら days 日前から'
+        required: false
+        default: ''
+      days:
+        description: 'since が空欄のときに遡る日数'
+        required: false
+        default: '30'
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: collect-comment-candidates
+  cancel-in-progress: false
+
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      # 未マージの候補PRに含まれる source_url を除外リストにし、同じ候補を重複して提案しない。
+      - name: Collect source_url of open candidate PRs
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          : > "$RUNNER_TEMP/exclude-urls.txt"
+          for branch in $(gh pr list --state open --limit 100 --json headRefName \
+              --jq '.[].headRefName | select(startswith("auto/comment-candidates-"))'); do
+            git fetch --quiet origin "$branch"
+            git diff origin/main...FETCH_HEAD -- data/comments \
+              | sed -nE 's/^\+source_url:[[:space:]]*"?([^"]*)"?[[:space:]]*$/\1/p' \
+              >> "$RUNNER_TEMP/exclude-urls.txt"
+          done
+          echo "excluded $(wc -l < "$RUNNER_TEMP/exclude-urls.txt") URL(s) from open candidate PRs"
+
+      - name: Collect candidates
+        env:
+          SINCE: ${{ inputs.since }}
+          DAYS: ${{ inputs.days || '30' }}
+        run: |
+          args=(--days "$DAYS" --exclude-urls "$RUNNER_TEMP/exclude-urls.txt" --summary "$RUNNER_TEMP/summary.md")
+          if [ -n "$SINCE" ]; then args+=(--since "$SINCE"); fi
+          python3 scripts/collect_comment_candidates.py "${args[@]}"
+
+      - name: Check for changes
+        id: changes
+        run: |
+          if [ -z "$(git status --porcelain -- data/comments)" ]; then
+            echo "No new candidates."
+            echo "found=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "found=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      # GITHUB_TOKEN で作成したPRでは他のワークフロー (deploy.yml の build) が起動しないため、
+      # PR作成前にここでスキーマ検証 (npm run build) を行う。失敗した場合はPRを作らない。
+      - uses: actions/setup-node@v7
+        if: steps.changes.outputs.found == 'true'
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Validate (npm run build)
+        if: steps.changes.outputs.found == 'true'
+        run: |
+          npm ci
+          npm run build
+
+      - name: Create pull request
+        if: steps.changes.outputs.found == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          branch="auto/comment-candidates-$(date -u +%Y%m%d-%H%M%S)"
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git switch -c "$branch"
+          git add data/comments
+          git commit -m "国会会議録から実発言コメントの候補を自動収集(verified: false)"
+          git push origin "$branch"
+          gh pr create \
+            --base main \
+            --head "$branch" \
+            --title "[auto] 実発言コメント候補の自動収集 ($(date -u +%Y-%m-%d))" \
+            --body-file "$RUNNER_TEMP/summary.md"
