@@ -3,6 +3,8 @@ import { getCollection, getEntry, type CollectionEntry } from 'astro:content';
 import BaseLayout from '../../../../layouts/BaseLayout.astro';
 import CommentList from '../../../../components/CommentList.astro';
 import { articleLabel } from '../../../../lib/draftDiff';
+import { getDraftDeletionComments } from '../../../../lib/draftComments';
+import ParagraphLink from '../../../../components/ParagraphLink.astro';
 
 export async function getStaticPaths() {
   const drafts = await getCollection('drafts');
@@ -28,29 +30,10 @@ const current = await getEntry('articles', entry.data.id);
 const paragraphs = current && (current.data.kind === 'article' || current.data.kind === 'preamble') ? current.data.paragraphs : [];
 const base = import.meta.env.BASE_URL;
 
-// この削除される条文番号に、別の現行条文からの改番で同じ番号の条文が新設されることが
-// ある(例: 現行97条の削除と、現行95条からの改番による新97条。design.md 5.2)。この
-// とき、改番後の条文(art-XXX.yaml)と削除(del-art-XXX.yaml)とで id(番号)が衝突
-// する。改番後の条文へのコメントは 5.5節の規約により article_ids に改番前・改番後
-// 両方のidを含むため、改番前のidも含むコメントは衝突側(削除)のものではないとみなし、
-// ここでは除外する。
-const draftArticles = await getCollection('draftArticles');
-const collidingRename = draftArticles.find(
-  (a) =>
-    a.id.startsWith(`${draft.id}/`) &&
-    a.data.id === entry.data.id &&
-    a.data.renamed_from &&
-    a.data.renamed_from !== a.data.id,
-);
-
-// verified: false のコメントは公開しない (docs/design.md 10)
-const comments = (await getCollection('comments')).filter(
-  (comment) =>
-    comment.data.verified &&
-    comment.data.draft_id === draft.id &&
-    comment.data.article_ids.includes(entry.data.id) &&
-    !(collidingRename && comment.data.article_ids.includes(collidingRename.data.renamed_from!)),
-);
+// この削除へのコメント(公開済みのみ)。削除される条文番号に、別の現行条文からの改番で
+// 同じ番号の条文が来る場合(例: 現行97条の削除と、現行95条からの改番による新97条)の
+// 除外を含む判定は src/lib/draftComments.ts に集約している(Issue #220)。
+const comments = await getDraftDeletionComments(entry);
 ---
 
 <BaseLayout
@@ -79,8 +62,10 @@ const comments = (await getCollection('comments')).filter(
 		</div>
 		<div class="font-mono px-3 py-3 text-sm leading-relaxed">
 			{paragraphs.map((p) => (
-				<div class="flex gap-3 py-1">
-					<span class="shrink-0 text-right" style="width: 1.5rem; color: var(--ink-muted);">{p.no}</span>
+				<div class="para-row flex gap-3 py-1" id={`p${p.no}`}>
+					<span class="shrink-0 text-right" style="width: 1.5rem;">
+						<ParagraphLink anchor={`p${p.no}`} label={p.no} ariaLabel={`第${p.no}項へのリンク`} />
+					</span>
 					<p style="color: var(--ink);"><del>{p.text}</del></p>
 				</div>
 			))}

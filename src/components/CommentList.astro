@@ -32,7 +32,7 @@ const contextLinks = showContext
 ---
 
 {comments.length > 0 && (
-	<section class="mt-8">
+	<section class="mt-8" id="comments">
 		<h2 class="font-mono mb-3 text-sm" style="color: var(--ink-muted);">{heading}({comments.length})</h2>
 		<ul class="space-y-4">
 			{comments.map((comment, i) => (

@@ -2,6 +2,9 @@
 import { getCollection, type CollectionEntry } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import CommentList from '../../components/CommentList.astro';
+import { getCurrentArticleComments } from '../../lib/draftComments';
+import ParagraphLink from '../../components/ParagraphLink.astro';
+import { articleLegislation } from '../../lib/structuredData';
 
 export async function getStaticPaths() {
   const articles = await getCollection('articles');
@@ -22,10 +25,20 @@ const heading = kind === 'preamble' ? '前文' : `日本国憲法 第${article.d
 const pageTitle = kind === 'preamble' ? '前文' : `第${article.data.number}条`;
 const description = `${heading}の本文。${paragraphs[0]?.text.slice(0, 80) ?? ''}…`;
 
-// verified: false のコメントは公開しない (docs/design.md 10)
-const comments = (await getCollection('comments')).filter(
-  (comment) => comment.data.verified && comment.data.article_ids.includes(article.id),
-);
+// 構造化データ(schema.org Legislation。src/lib/structuredData.ts、Issue #170)
+const structuredData = articleLegislation({
+  name: kind === 'preamble' ? '日本国憲法 前文' : heading,
+  paragraphs,
+  url: new URL(Astro.url.pathname, Astro.site).toString(),
+  sourceUrl: source_url,
+  retrievedAt: retrieved_at,
+});
+
+// verified: false のコメントは公開しない (docs/design.md 10)。改憲案へのコメントは、
+// その改憲案の条文が対応する現行条文(変更=同じ番号、改番=改番前、削除=削除される条文)の
+// ページにだけ表示し、番号が偶然一致するだけの新設条文などへのコメントは出さない
+// (src/lib/draftComments.ts、Issue #229)。
+const comments = await getCurrentArticleComments(article.id);
 
 const base = import.meta.env.BASE_URL;
 
@@ -79,6 +92,7 @@ for (const entry of await getCollection('draftDeletions')) {
 	ogImage={`${base}og/articles/${article.id}.png`}
 	breadcrumb={[{ name: '条文', href: base }, { name: pageTitle }]}
 	pagefindFilters={{ 種類: '条文' }}
+	structuredData={structuredData}
 >
 	<p class="font-mono mb-4 text-sm">
 		<a href={base}>&larr; 条文一覧</a>
@@ -102,12 +116,16 @@ for (const entry of await getCollection('draftDeletions')) {
 
 			<div class="font-mincho divide-y" style="border-color: var(--line);">
 				{paragraphs.map((paragraph) => (
-					<div class="flex gap-4 py-2 leading-relaxed">
-						{kind === 'article' && (
-							<span class="font-mono shrink-0 pt-0.5 text-right text-xs" style="width: 1.5rem; color: var(--ink-muted);">
-								{paragraph.no}
-							</span>
-						)}
+					// 項単位のパーマリンク(#p<項番号>、Issue #168)。前文には公式の段落番号がないため、
+					// 番号ではなく「¶」をリンクにする(design.md 5.1)。
+					<div class="para-row flex gap-4 py-2 leading-relaxed" id={`p${paragraph.no}`}>
+						<span class="font-mono shrink-0 pt-0.5 text-right text-xs" style="width: 1.5rem;">
+							{kind === 'article' ? (
+								<ParagraphLink anchor={`p${paragraph.no}`} label={paragraph.no} ariaLabel={`第${paragraph.no}項へのリンク`} />
+							) : (
+								<ParagraphLink anchor={`p${paragraph.no}`} label="¶" ariaLabel={`この段落へのリンク(表示上の第${paragraph.no}段落)`} />
+							)}
+						</span>
 						<p style="color: var(--ink);">{paragraph.text}</p>
 					</div>
 				))}

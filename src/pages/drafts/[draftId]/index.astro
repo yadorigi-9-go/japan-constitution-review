@@ -2,6 +2,8 @@
 import { getCollection, type CollectionEntry } from 'astro:content';
 import BaseLayout from '../../../layouts/BaseLayout.astro';
 import { articleLabel } from '../../../lib/draftDiff';
+import { getDraftCommentCounts } from '../../../lib/draftComments';
+import CommentCount from '../../../components/CommentCount.astro';
 
 export async function getStaticPaths() {
   const drafts = await getCollection('drafts');
@@ -28,6 +30,10 @@ const changedArticles = (await getCollection('draftArticles'))
 const deletedArticles = (await getCollection('draftDeletions'))
   .filter((entry) => entry.id.startsWith(`${draft.id}/`))
   .sort((a, b) => a.data.id.localeCompare(b.data.id));
+
+// 各条文・削除ページに表示されるコメント数(公開済みのみ)。各ページと同じ判定で数える
+// (src/lib/draftComments.ts、Issue #220)。賛否(stance)の内訳は表示しない(#167)。
+const commentCounts = await getDraftCommentCounts(draft.id);
 
 const base = import.meta.env.BASE_URL;
 ---
@@ -85,7 +91,7 @@ const base = import.meta.env.BASE_URL;
 			return (
 				<li class="flex items-start gap-3 py-3" data-status={status}>
 					<span class="mt-1.5 inline-block h-3 w-3 shrink-0 rounded-full" style="background: var(--danger);" aria-hidden="true" />
-					<div>
+					<div class="min-w-0 flex-1">
 						<a href={`${base}drafts/${draft.id}/${entry.data.id}`} class="no-underline hover:underline">
 							<span class="font-mincho text-lg" style="color: var(--ink);">{entry.data.title}</span>
 						</a>
@@ -95,13 +101,14 @@ const base = import.meta.env.BASE_URL;
 								: articleLabel(entry.data.id)}
 						</p>
 					</div>
+					<CommentCount count={commentCounts.get(entry.id) ?? 0} href={`${base}drafts/${draft.id}/${entry.data.id}#comments`} />
 				</li>
 			);
 		})}
 		{deletedArticles.map((entry) => (
 			<li class="flex items-start gap-3 py-3" data-status="deleted">
 				<span class="mt-1.5 inline-block h-3 w-3 shrink-0 rounded-full" style="background: var(--ink-muted);" aria-hidden="true" />
-				<div>
+				<div class="min-w-0 flex-1">
 					<a href={`${base}drafts/${draft.id}/deleted/${entry.data.id}`} class="no-underline hover:underline">
 						<span class="font-mincho text-lg" style="color: var(--ink);">{entry.data.title}</span>
 					</a>
@@ -110,6 +117,7 @@ const base = import.meta.env.BASE_URL;
 						<span class="tag">削除</span>
 					</p>
 				</div>
+				<CommentCount count={commentCounts.get(entry.id) ?? 0} href={`${base}drafts/${draft.id}/deleted/${entry.data.id}#comments`} />
 			</li>
 		))}
 	</ul>

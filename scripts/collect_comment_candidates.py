@@ -138,6 +138,89 @@ def load_existing() -> tuple[set[str], dict[str, str], set[str]]:
     return urls, surnames, ids
 
 
+# ---------------------------------------------------------------------------
+# 既存コメントの賛否(stance)の内訳(収集作業用。Issue #167)
+#
+# 公開ページには件数・比率を表示しない(「賛成/反対が多い」という印象を与え、中立性の
+# 表明と逆の効果になりうるため)。ここでは、反対側の立場の発言を探すきっかけにする
+# 目的で、候補PRの本文と --stance-report の出力にだけ使う(docs/design.md 5.5 の2)。
+# ---------------------------------------------------------------------------
+
+STANCES = ("support", "oppose", "neutral")
+STANCE_PATTERN = re.compile(r'^stance:\s*"?(\w+)"?\s*$', re.MULTILINE)
+DRAFT_ID_PATTERN = re.compile(r'^draft_id:\s*"?([\w-]+)"?\s*$', re.MULTILINE)
+ARTICLE_IDS_PATTERN = re.compile(r"^article_ids:\s*\[(.*?)\]\s*$", re.MULTILINE)
+VERIFIED_PATTERN = re.compile(r"^verified:\s*true\s*$", re.MULTILINE)
+
+
+def load_stance_records() -> list[tuple[str | None, set[str], str]]:
+    """公開済み(verified: true)のコメントの (draft_id, article_ids, stance)。"""
+    records = []
+    for path in COMMENTS_DIR.glob("*/*.yaml"):
+        text = path.read_text(encoding="utf-8")
+        if not VERIFIED_PATTERN.search(text):
+            continue
+        stance = STANCE_PATTERN.search(text)
+        ids = ARTICLE_IDS_PATTERN.search(text)
+        draft = DRAFT_ID_PATTERN.search(text)
+        if not stance or not ids:
+            continue
+        draft_id = draft.group(1) if draft and draft.group(1) != "null" else None
+        article_ids = {a.strip().strip("\"'") for a in ids.group(1).split(",") if a.strip()}
+        records.append((draft_id, article_ids, stance.group(1)))
+    return records
+
+
+def stance_counts(records: list[tuple[str | None, set[str], str]], draft_id: str | None,
+                  article_ids: list[str]) -> dict[str, int]:
+    """draft_id が一致し、article_ids をすべて含むコメントの stance ごとの件数。
+
+    改番された条文の検索対象は改番前・改番後の両方のidを持つため、それらをすべて含む
+    コメントだけを数えることで、番号が偶然一致する別の条文へのコメントをおおむね除く。
+    収集作業の目安であり、サイトの表示判定(src/lib/draftComments.ts)ほど厳密ではない。"""
+    counts = {s: 0 for s in STANCES}
+    if not article_ids:
+        return counts
+    want = set(article_ids)
+    for rec_draft, rec_ids, stance in records:
+        if rec_draft == draft_id and want <= rec_ids and stance in counts:
+            counts[stance] += 1
+    return counts
+
+
+def stance_note(counts: dict[str, int]) -> str:
+    """件数から、収集の手がかりになる事実だけを書く(評価語は使わない)。"""
+    total = sum(counts.values())
+    if total == 0:
+        return "未収集"
+    missing = [s for s in ("support", "oppose") if counts[s] == 0]
+    return " / ".join(f"{s} の発言が未収集" for s in missing)
+
+
+def format_counts(counts: dict[str, int]) -> str:
+    return " / ".join(f"{s} {counts[s]}" for s in STANCES)
+
+
+def render_stance_table(targets: list[dict], records: list[tuple[str | None, set[str], str]]) -> list[str]:
+    lines = [
+        "| 検索対象 | 改憲案側(support / oppose / neutral) | メモ | 現行条文側(support / oppose / neutral) | メモ |",
+        "| --- | --- | --- | --- | --- |",
+    ]
+    for target in targets:
+        draft_counts = stance_counts(records, target["draft_id"], target["article_ids"])
+        fallback = target.get("fallback_article_ids") or []
+        if fallback:
+            current_counts = stance_counts(records, None, fallback[:1])
+            current_cell, current_note = f"`{fallback[0]}`: {format_counts(current_counts)}", stance_note(current_counts)
+        else:
+            current_cell, current_note = "(対応する現行条文なし)", ""
+        lines.append(
+            f"| {target['label']} | {format_counts(draft_counts)} | {stance_note(draft_counts)} | "
+            f"{current_cell} | {current_note} |"
+        )
+    return lines
+
+
 def load_ignore(paths: list[pathlib.Path]) -> set[str]:
     urls: set[str] = set()
     for path in paths:
@@ -330,12 +413,20 @@ def main() -> int:
                         help="候補から除外する source_url の一覧ファイル(1行1URL)。複数指定可")
     parser.add_argument("--summary", type=pathlib.Path, help="収集結果の Markdown を書き出すパス(PR本文用)")
     parser.add_argument("--dry-run", action="store_true", help="ファイルを書き出さずに候補だけ表示する")
+    parser.add_argument("--stance-report", action="store_true",
+                        help="APIにアクセスせず、全検索対象の既存コメントの賛否(stance)の内訳だけを表示する(収集作業用)")
     args = parser.parse_args()
 
     today = dt.date.today()
     since = dt.date.fromisoformat(args.since) if args.since else today - dt.timedelta(days=args.days)
     config = json.loads(TARGETS_PATH.read_text(encoding="utf-8"))
     default_meeting = config.get("default_meeting")
+    stance_records = load_stance_records()
+
+    if args.stance_report:
+        # 収集作業用(Issue #167)。公開ページには表示しない。
+        print("\n".join(render_stance_table(config["targets"], stance_records)))
+        return 0
 
     existing_urls, surnames, used_ids = load_existing()
     skip_urls = existing_urls | load_ignore([IGNORE_PATH, *args.exclude_urls])
@@ -392,14 +483,22 @@ def main() -> int:
             path.parent.mkdir(parents=True, exist_ok=True)
             path.write_text(render_yaml(cid, candidate), encoding="utf-8")
 
+    # 候補が見つかった検索対象について、既存コメントの賛否の内訳を出す(収集作業用。#167)。
+    labels = {c["target_label"] for _, _, c, _ in written}
+    hit_targets = [t for t in config["targets"] if t["label"] in labels]
+    if hit_targets:
+        print("\n既存コメントの賛否(stance)の内訳(収集作業用):")
+        print("\n".join(render_stance_table(hit_targets, stance_records)))
+
     if args.summary:
-        args.summary.write_text(render_summary(written, since), encoding="utf-8")
+        args.summary.write_text(render_summary(written, since, hit_targets, stance_records), encoding="utf-8")
 
     print(f"{len(written)} candidate(s){' (dry run)' if args.dry_run else ''}")
     return 0
 
 
-def render_summary(written: list[tuple[pathlib.Path, str, dict, bool]], since: dt.date) -> str:
+def render_summary(written: list[tuple[pathlib.Path, str, dict, bool]], since: dt.date,
+                   hit_targets: list[dict], stance_records: list[tuple[str | None, set[str], str]]) -> str:
     lines = [
         f"国会会議録検索APIから、{since.isoformat()} 以降の発言を対象に自動収集した実発言コメントの**候補**です(Issue #159)。",
         "",
@@ -422,6 +521,17 @@ def render_summary(written: list[tuple[pathlib.Path, str, dict, bool]], since: d
             f"| `{path.relative_to(ROOT)}` | {r['speaker']}({r['speakerGroup']}) | {r['date']} | "
             f"[{c['venue']}]({c['source_url']}) | {c['target_label']} | {draft} | {note} |"
         )
+    if hit_targets:
+        lines += [
+            "",
+            "### 既存コメントの賛否(stance)の内訳(収集作業用)",
+            "",
+            "候補が見つかった検索対象について、公開済み(`verified: true`)の既存コメントの件数です。"
+            "一方の立場だけに偏らないよう、未収集の立場の発言を探す手がかりにしてください"
+            "(docs/design.md 5.5 の2)。**この内訳はサイトには表示しません**(Issue #167)。",
+            "",
+            *render_stance_table(hit_targets, stance_records),
+        ]
     return "\n".join(lines) + "\n"
 
 

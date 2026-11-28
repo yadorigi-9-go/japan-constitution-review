@@ -92,7 +92,8 @@ for (const article of articles) {
   if (supersededIds.has(article.id)) continue;
   const isPreamble = article.data.kind === 'preamble';
   rows.push({
-    sortKey: isPreamble ? -1 : article.data.number,
+    // kind で直接判定して型を絞り込む(前文の型には number がないため。Issue #230)。
+    sortKey: article.data.kind === 'preamble' ? -1 : article.data.number,
     branchSuffix: branchSuffix(article.id),
     isPreamble,
     chapter: article.data.kind === 'article' ? article.data.chapter : null,
@@ -162,7 +163,9 @@ const statusLabel = { changed: '変更', new: '新設', renamed: '改番', delet
 				)}
 				<ul class="divide-y" style="border-color: var(--line);">
 					{group.items.map((row) => (
-						<li class="border-b" style="border-color: var(--line);">
+						// 条文単位のアンカー(例: branch#art-009。Issue #168)。削除は改番後の条文と
+						// 番号が重なりうるため del- を付ける。
+						<li class="para-row border-b" style="border-color: var(--line);" id={row.status === 'deleted' ? `del-${row.idForDisplay}` : row.idForDisplay}>
 							<a href={row.href} class="flex items-baseline gap-3 px-1 py-2 no-underline hover:underline">
 								<span class="font-mono text-xs" style="color: var(--ink-muted);">{row.idForDisplay}</span>
 								<span class="font-mincho" style="color: var(--ink);">{row.label}</span>

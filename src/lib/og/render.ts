@@ -38,7 +38,7 @@ export async function renderOgImage({
   subtitle,
   badge,
   titleFontSize = 76,
-}: OgImageProps): Promise<Buffer> {
+}: OgImageProps): Promise<Uint8Array<ArrayBuffer>> {
   const fonts = await loadOgFonts();
 
   const tree = el(
@@ -125,5 +125,7 @@ export async function renderOgImage({
 
   const svg = await satori(tree, { width: WIDTH, height: HEIGHT, fonts });
   const resvg = new Resvg(svg, { fitTo: { mode: 'width', value: WIDTH } });
-  return resvg.render().asPng();
+  // Response の body に渡せる型(BodyInit)にするため、Node の Buffer を Uint8Array にする
+  // (Buffer<ArrayBufferLike> のままだと astro check で型エラーになる。Issue #230)。
+  return new Uint8Array(resvg.render().asPng());
 }

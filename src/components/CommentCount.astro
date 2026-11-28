@@ -1,0 +1,26 @@
+---
+// 一覧の各行に表示するコメント数(GitHub の PR 一覧のコメント数アイコンに相当。Issue #220)。
+// 0件のときは何も表示しない。賛否(stance)の内訳は表示しない(#167)。
+interface Props {
+	count: number;
+	/** クリック時の遷移先(各ページのコメント欄 #comments) */
+	href: string;
+}
+
+const { count, href } = Astro.props;
+---
+
+{count > 0 && (
+	<a
+		href={href}
+		class="font-mono mt-1 inline-flex shrink-0 items-center gap-1 text-xs no-underline hover:underline"
+		style="color: var(--ink-muted);"
+		aria-label={`コメント ${count}件`}
+		title={`コメント ${count}件`}
+	>
+		<svg aria-hidden="true" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round">
+			<path d="M2.5 3.5a1 1 0 0 1 1-1h9a1 1 0 0 1 1 1v6.5a1 1 0 0 1-1 1H7l-3 2.5V11H3.5a1 1 0 0 1-1-1z" />
+		</svg>
+		<span>{count}</span>
+	</a>
+)}
