@@ -32,7 +32,7 @@ export async function computeDraftArticleDiff(entry: CollectionEntry<'draftArtic
   const paragraphDiffs = newParagraphs.map((p) => {
     const basedOn = p.based_on === undefined ? p.no : p.based_on;
     const oldText = basedOn !== null ? (oldParagraphs.find((op) => op.no === basedOn)?.text ?? '') : '';
-    return { no: p.no, basedOn, parts: diffChars(oldText, p.text) };
+    return { no: p.no, basedOn, deleted: false, parts: diffChars(oldText, p.text) };
   });
   // 新条文側のどの項からも参照されなかった現行項は、純粋な削除として表示する。GitHub の
   // diff 表示(削除行が先、追加・変更行が後)に合わせ、末尾に追加するのではなく、
@@ -40,7 +40,9 @@ export async function computeDraftArticleDiff(entry: CollectionEntry<'draftArtic
   // 既に表示された後に削除が出てきて、表示順が現行条文の項番号と食い違ってしまうため。
   for (const op of oldParagraphs) {
     if (!usedOldNos.has(op.no)) {
-      const deletionRow = { no: op.no, basedOn: op.no, parts: diffChars(op.text, '') };
+      // no は現行側の項番号。草案側の項番号と重なりうるため、deleted で区別する
+      // (項単位のパーマリンクでは #del-p<no> とする。Issue #168)。
+      const deletionRow = { no: op.no, basedOn: op.no, deleted: true, parts: diffChars(op.text, '') };
       const insertAt = paragraphDiffs.findIndex((row) => row.basedOn !== null && row.basedOn > op.no);
       if (insertAt === -1) {
         paragraphDiffs.push(deletionRow);
@@ -56,6 +58,6 @@ export async function computeDraftArticleDiff(entry: CollectionEntry<'draftArtic
     renamedFrom: entry.data.renamed_from,
     isRenamed,
     isNew,
-    paragraphDiffs: paragraphDiffs.map(({ no, parts }) => ({ no, parts })),
+    paragraphDiffs: paragraphDiffs.map(({ no, deleted, parts }) => ({ no, deleted, parts })),
   };
 }

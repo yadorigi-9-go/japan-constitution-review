@@ -1,6 +1,7 @@
 ---
 import { getEntry, type CollectionEntry } from 'astro:content';
 import { articleLabel } from '../lib/draftDiff';
+import ParagraphLink from './ParagraphLink.astro';
 
 // 改憲案で現行条文がまるごと削除される場合(del-<article-id>.yaml)のカード。
 // 現行条文の本文全体を取消線付きで表示する(docs/design.md 5.2)。
@@ -32,8 +33,11 @@ const paragraphs = current ? current.data.paragraphs : [];
 	</div>
 	<div class="font-mono px-3 py-3 text-sm leading-relaxed">
 		{paragraphs.map((p) => (
-			<div class="flex gap-3 py-1">
-				<span class="shrink-0 text-right" style="width: 1.5rem; color: var(--ink-muted);">{p.no}</span>
+			// 比較ビューなど複数カードが並ぶ場合(href あり)は id を付けず、削除ページの項へリンクする。
+			<div class="para-row flex gap-3 py-1" id={href ? undefined : `p${p.no}`}>
+				<span class="shrink-0 text-right" style="width: 1.5rem;">
+					<ParagraphLink anchor={`p${p.no}`} label={p.no} ariaLabel={`第${p.no}項へのリンク`} pageHref={href} />
+				</span>
 				<p style="color: var(--ink);"><del>{p.text}</del></p>
 			</div>
 		))}

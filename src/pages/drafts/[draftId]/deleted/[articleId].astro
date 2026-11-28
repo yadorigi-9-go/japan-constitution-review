@@ -4,6 +4,7 @@ import BaseLayout from '../../../../layouts/BaseLayout.astro';
 import CommentList from '../../../../components/CommentList.astro';
 import { articleLabel } from '../../../../lib/draftDiff';
 import { getDraftDeletionComments } from '../../../../lib/draftComments';
+import ParagraphLink from '../../../../components/ParagraphLink.astro';
 
 export async function getStaticPaths() {
   const drafts = await getCollection('drafts');
@@ -61,8 +62,10 @@ const comments = await getDraftDeletionComments(entry);
 		</div>
 		<div class="font-mono px-3 py-3 text-sm leading-relaxed">
 			{paragraphs.map((p) => (
-				<div class="flex gap-3 py-1">
-					<span class="shrink-0 text-right" style="width: 1.5rem; color: var(--ink-muted);">{p.no}</span>
+				<div class="para-row flex gap-3 py-1" id={`p${p.no}`}>
+					<span class="shrink-0 text-right" style="width: 1.5rem;">
+						<ParagraphLink anchor={`p${p.no}`} label={p.no} ariaLabel={`第${p.no}項へのリンク`} />
+					</span>
 					<p style="color: var(--ink);"><del>{p.text}</del></p>
 				</div>
 			))}

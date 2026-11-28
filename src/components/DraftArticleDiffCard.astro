@@ -1,5 +1,6 @@
 ---
 import { articleLabel, type computeDraftArticleDiff } from '../lib/draftDiff';
+import ParagraphLink from './ParagraphLink.astro';
 
 interface Props {
 	row: Awaited<ReturnType<typeof computeDraftArticleDiff>>;
@@ -27,9 +28,17 @@ const Heading = headingLevel;
 		</p>
 	</div>
 	<div class="font-mono px-3 py-3 text-sm leading-relaxed">
-		{row.paragraphDiffs.map((pd) => (
-			<div class="flex gap-3 py-1">
-				<span class="shrink-0 text-right" style="width: 1.5rem; color: var(--ink-muted);">{pd.no}</span>
+		{row.paragraphDiffs.map((pd) => {
+			// 削除された項の no は現行側の項番号で、草案側の項番号と重なりうるため別のアンカー名にする。
+			const anchor = pd.deleted ? `del-p${pd.no}` : `p${pd.no}`;
+			const ariaLabel = pd.deleted ? `削除される現行第${pd.no}項へのリンク` : `第${pd.no}項へのリンク`;
+			return (
+			// 比較ビューなど、1ページに複数のカードが並ぶ場合(href あり)は id を付けず、
+			// 項番号のリンク先を各条文ページの項にする(id の重複を避けるため)。
+			<div class="para-row flex gap-3 py-1" id={href ? undefined : anchor}>
+				<span class="shrink-0 text-right" style="width: 1.5rem;">
+					<ParagraphLink anchor={anchor} label={pd.no} ariaLabel={ariaLabel} pageHref={href} />
+				</span>
 				<p style="color: var(--ink);">
 					{pd.parts.map((part) =>
 						part.added ? (
@@ -42,6 +51,7 @@ const Heading = headingLevel;
 					)}
 				</p>
 			</div>
-		))}
+			);
+		})}
 	</div>
 </div>
