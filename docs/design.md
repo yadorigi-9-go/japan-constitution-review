@@ -300,6 +300,7 @@ GitHub Actions で次を自動化する。
 | チェック | 内容 | 実装 |
 | --- | --- | --- |
 | スキーマ検証 | YAML の必須項目・列挙値を検証 | 実装済み(`npm run build` が Zod によるスキーマ検証を兼ねる。`.github/workflows/deploy.yml` の `build` ジョブで push・PR 時に実行) |
+| 型チェック | `.astro` / `.ts` の型を検証(`tsconfig.json` は `astro/tsconfigs/strict`) | 実装済み(`npm run check` = `astro check`。`astro build` は型エラーがあっても止まらないため、`deploy.yml` の `build` ジョブでビルド前に実行し、型エラーがあればジョブを失敗させる。候補収集のワークフローはデータ追加のみのため対象外。Issue #230、2026-11-28) |
 | リンク切れチェック | `source_url` と `archive_url` を定期確認 | 実装済み(`scripts/check_links.py` / `npm run check:links`。`.github/workflows/check-links.yml` で毎週実行) |
 | 未確認データの除外 | `verified: false` のコメントは公開しない | 実装済み(各ページ側で `comment.data.verified` をフィルタ) |
 | ビルド・デプロイ | main へのマージで GitHub Pages に公開 | 実装済み。リポジトリをpublic化しGitHub Pagesを有効化したため、`deploy` ジョブを再有効化済み(`.github/workflows/deploy.yml`、2026-11-02) |
