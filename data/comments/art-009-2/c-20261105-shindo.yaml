@@ -1,13 +1,9 @@
-# 自動収集した候補(scripts/collect_comment_candidates.py)。出典と照合し、
-# stance / claim_type / summary / tags / id を確認・修正してから verified: true にする。
 id: c-20261105-shindo
 article_ids: [art-009-2]
 draft_id: jimin-2018
 kind: speech
-# 要確認: claim_type は自動収集の仮値
 claim_type: quote
-# 要確認: stance は自動収集の仮値(発言者本人の立場表明に基づいて設定する)
-stance: neutral
+stance: support
 source_type: primary
 speaker:
   name: "新藤義孝"
@@ -15,11 +11,11 @@ speaker:
   party: "自由民主党・無所属の会"
 date: 2026-11-05
 venue: "衆議院憲法審査会"
-excerpt: "それは、平和主義の理念の下、九条一項、二項に加えて、新たに九条の二を追加し、我が国の平和と独立を守り、国及び国民の安全を保つという国防規定の創設と、その担い手となる実力組織としての自衛隊を明記する、さらに、その活動を民主的な統制の下に置くためのシビリアンコントロールの明記、これを定めてはどうかというものであります。"
-summary: ""
-summary_source: human
+excerpt: "私は、これにより、憲法の未完成部分を完成させ、いかなるときも国と国民を守り抜く国防体制が更に確固たるものになると考えております。"
+summary: "自由民主党の新藤義孝衆議院議員が、2018年「条文イメージ(たたき台素案)」の第9条の2(国防規定の創設、自衛隊の明記、シビリアンコントロールの明記)の内容を紹介し、これにより憲法の未完成部分が完成し国防体制がより確固たるものになるとの考えを述べた。あわせて、自衛隊が軍隊かは軍隊の定義によるとする政府答弁と同じ立場に立つと述べた。"
+summary_source: ai
 source_url: "https://kokkai.ndl.go.jp/txt/122204183X00320261105/2"
 archive_url: ""
 accessed_at: 2026-11-28
-tags: []
+tags: ["自衛隊明記", "9条の2", "自民党2018年条文イメージ"]
 verified: false

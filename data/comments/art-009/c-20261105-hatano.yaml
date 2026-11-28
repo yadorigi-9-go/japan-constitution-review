@@ -1,13 +1,9 @@
-# 自動収集した候補(scripts/collect_comment_candidates.py)。出典と照合し、
-# stance / claim_type / summary / tags / id を確認・修正してから verified: true にする。
 id: c-20261105-hatano
 article_ids: [art-009]
 draft_id: null
 kind: speech
-# 要確認: claim_type は自動収集の仮値
-claim_type: quote
-# 要確認: stance は自動収集の仮値(発言者本人の立場表明に基づいて設定する)
-stance: neutral
+claim_type: interpretation
+stance: oppose
 source_type: primary
 speaker:
   name: "畑野君枝"
@@ -15,11 +11,11 @@ speaker:
   party: "日本共産党"
 date: 2026-11-05
 venue: "衆議院憲法審査会"
-excerpt: "この審査会では、憲法九条を変えて自衛隊を明記すべきだとか、国防軍として位置づけるべきだという主張がされています。"
-summary: ""
-summary_source: human
+excerpt: "この審査会では、憲法九条を変えて自衛隊を明記すべきだとか、国防軍として位置づけるべきだという主張がされています。しかし、そうした議論で一切触れられないのは、憲法と矛盾する米軍の存在です。"
+summary: "日本共産党の畑野君枝衆議院議員が、国民が改憲を求めていない中で憲法審査会を動かすべきではないとの立場を述べた。9条を変えて自衛隊を明記する、国防軍として位置づけるといった主張がある一方で、憲法と矛盾する米軍の存在には触れられていないと指摘し、9条を生かす議論が必要だと述べた。"
+summary_source: ai
 source_url: "https://kokkai.ndl.go.jp/txt/122204183X00320261105/14"
 archive_url: ""
 accessed_at: 2026-11-28
-tags: []
+tags: ["第9条", "安全保障", "在日米軍"]
 verified: false
