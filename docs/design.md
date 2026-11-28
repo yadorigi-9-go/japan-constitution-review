@@ -301,13 +301,31 @@ GitHub Actions で次を自動化する。
 | リンク切れチェック | `source_url` と `archive_url` を定期確認 | 実装済み(`scripts/check_links.py` / `npm run check:links`。`.github/workflows/check-links.yml` で毎週実行) |
 | 未確認データの除外 | `verified: false` のコメントは公開しない | 実装済み(各ページ側で `comment.data.verified` をフィルタ) |
 | ビルド・デプロイ | main へのマージで GitHub Pages に公開 | 実装済み。リポジトリをpublic化しGitHub Pagesを有効化したため、`deploy` ジョブを再有効化済み(`.github/workflows/deploy.yml`、2026-11-02) |
+| コメント候補の定期収集 | 国会会議録検索APIから実発言コメントの候補を収集し、候補があればPRを作成 | 実装済み(`scripts/collect_comment_candidates.py` / `npm run collect:comments`。`.github/workflows/collect-comment-candidates.yml` で毎週実行。下記「コメント候補の定期収集」を参照、Issue #159、2026-11-28) |
 
 - 改憲をめぐる議論は動きやすいため、各ページに「最終確認日」を表示し、定期的に更新する。
 - 変更はプルリクエストでレビューし、出典の確認を必須にする。(2026-11-01 よりブランチ+PRでの運用に変更)
 - 実発言コメント収集の進捗は GitHub Project(条文ごとの Issue を親issueの sub-issue として管理)で追跡する。検索・ローマ字表記の確認方法は5.5節を参照。コメント収集タスクに限り、内容をチャットで提示すれば承認を待たずに branch 作成〜commit〜push〜PR作成まで進めてよい(CLAUDE.md参照、2026-11-01)。
 - 条ごとのコメント収集issueのタイトルには、改憲案のdraft idを `[draft-id]` の形式で先頭に付ける(例: `[jimin-2018] 第9条の2(自衛隊明記・新設)への実発言収集`)。同じ条文idでも改憲案によって内容が全く異なる場合がある(例: `art-009-2` は jimin-2012 では「国防軍の新設」、jimin-2018 では「自衛隊明記」)ため、タイトルだけで区別できるようにする(2026-11-01)。
-- 外部からの実発言コメントの追加方法(手元のAIアシスタント向けプロンプトを含む)は [CONTRIBUTING.md](../CONTRIBUTING.md) を参照(2026-11-01)。GitHub Actions等による自動下書き生成は、secretsの管理やフォークPRへの安全性の懸念から見送った([#76](https://github.com/yadorigi-9-go/japan-constitution-review/issues/76))。
+- 外部からの実発言コメントの追加方法(手元のAIアシスタント向けプロンプトを含む)は [CONTRIBUTING.md](../CONTRIBUTING.md) を参照(2026-11-01)。GitHub Actions等による自動下書き生成は、secretsの管理やフォークPRへの安全性の懸念から見送った([#76](https://github.com/yadorigi-9-go/japan-constitution-review/issues/76))。なお、AIを使わずsecretsも不要な「候補の収集」に限っては、下記のとおり自動化した(#159)。
 - public化に伴い、main への直接pushを禁止しPRとCI(buildジョブ)のpass・最新化を必須とするbranch protectionを設定。あわせてSecret scanning / push protection、Dependabot alerts、Private vulnerability reportingを有効化した(2026-11-02)。
+
+### コメント候補の定期収集(Issue #159)
+
+自動化するのは**候補の発見・整理まで**とし、出典との照合と公開可否の判断(`verified: true` への変更)は人が行う。
+
+- **収集対象**: 国会会議録検索API(一次資料)の発言のうち、`scripts/comment_collection_targets.json` に定義した改憲案の条文ごとの検索語に一致するもの。既定では憲法審査会の発言に限定する。参考人・公述人等(`speakerRole` あり)や会派の記録がない発言者(政府参考人等)は対象外。
+- **頻度**: 毎週水曜 01:00 UTC(10:00 JST)。既定で直近30日の発言を対象にする(会議録の公開には会議から数日〜数週間かかるため、期間を重ねて取りこぼしを防ぐ)。手動実行(`workflow_dispatch`)では `since` / `days` を指定できる。
+- **保存形式**: 既存のスキーマどおり `data/comments/<article-id>/<id>.yaml` に書き出す。
+  - `verified: false` 固定。`excerpt` はAPIの発言本文からの一言一句そのままの部分文字列(キーワードを含む最初の文。長い場合は読点で後ろを切る)。`summary` は空欄、`tags` は空。
+  - `stance` / `claim_type` はスキーマ上必須のため仮値(`neutral` / `quote`)を入れ、YAMLコメントで「要確認」と明記する。
+  - `draft_id` は、発言本文に改憲案への言及語(`draft_mention_keywords`)が含まれる場合のみ設定し、含まれない場合は現行条文側(`fallback_article_ids`、`draft_id: null`)の候補にする(5.5節の7)。
+  - `id` の姓は、既存データに同じ発言者がいればその表記を使う。いなければ `speakerYomi` 全体をローマ字化した仮のidにし、PR本文で姓のみへの修正を促す(読みから姓を推測で切り出さない。5.5節の3)。
+- **重複の処理**: 既存の `data/comments/` の `source_url`、未マージの候補PR(`auto/comment-candidates-*`)に含まれる `source_url`、`scripts/comment_collection_ignore.txt`(不採用にした候補のURL)と一致する発言は候補にしない。
+- **通知**: 候補がある場合のみ、`auto/comment-candidates-<日時>` ブランチを作成してPRを開く(PR本文に候補一覧と確認事項を記載)。候補がない場合はブランチ・PR・通知を作らない。
+- **失敗時の挙動**: APIリクエストは再試行(既定2回)し、それでも失敗した場合や `npm run build` によるスキーマ検証に失敗した場合は、ジョブを失敗させPRを作らない(GitHubの通常のワークフロー失敗通知で気づける)。リクエスト間隔は既定4秒(8節の利用規約)。
+- **権限**: `GITHUB_TOKEN` に `contents: write`(候補ブランチのpush)と `pull-requests: write`(PR作成)のみ付与する。リポジトリ設定の「Allow GitHub Actions to create and approve pull requests」を有効にする必要がある。
+- **CIについて**: `GITHUB_TOKEN` で作成したPRでは `deploy.yml` の `build` ジョブが起動しないため、ワークフロー内でPR作成前に `npm run build` を実行している。branch protection の必須チェックは、レビュー時に人が修正コミットをpushした時点(またはPRのclose/reopen)で実行される。
 
 ---
 
