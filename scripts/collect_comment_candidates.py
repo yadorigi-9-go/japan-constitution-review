@@ -234,7 +234,12 @@ def build_candidate(record: dict, target: dict, keywords: list[str], today: dt.d
         article_ids = target["article_ids"]
     else:
         draft_id = None
-        article_ids = target["fallback_article_ids"]
+        article_ids = target.get("fallback_article_ids") or []
+        if not article_ids:
+            # 新設条文などで、同じ番号の現行条文と内容が対応しない場合は fallback を
+            # 空にしておき、改憲案への言及がない発言は候補にしない(無関係な現行条文に
+            # 紐付けないため。docs/design.md 5.2 の is_new)。
+            return None
 
     position = record.get("speakerPosition") or ""
     house = record.get("nameOfHouse") or ""
@@ -335,14 +340,18 @@ def main() -> int:
     existing_urls, surnames, used_ids = load_existing()
     skip_urls = existing_urls | load_ignore([IGNORE_PATH, *args.exclude_urls])
 
-    written: list[tuple[pathlib.Path, str, dict, bool]] = []
-    seen: set[str] = set()
+    # source_url → 候補。同じ発言が複数の検索対象に一致した場合は、改憲案に紐付いた
+    # 候補(draft_id あり)を、現行条文側の候補(draft_id: null)より優先する。複数の
+    # 改憲案が同じ検索語を使う場合(例: 第26条は jimin-2012 / jimin-2018 の両方)に、
+    # 先に検索した対象の fallback に取られて改憲案への言及が失われないようにするため。
+    # どちらも draft_id ありなら、targets の並び順で先のものを採用する。
+    candidates: dict[str, dict] = {}
+    # 同じ検索条件のリクエストは1回の実行内で再利用し、APIへの重複アクセスを避ける
+    # (docs/design.md 8 のレート制限)。
+    cache: dict[tuple, list[dict]] = {}
     first_request = True
     for target in config["targets"]:
         for keywords in target["queries"]:
-            if not first_request:
-                time.sleep(args.sleep)
-            first_request = False
             params = {
                 "any": " ".join(keywords),
                 "from": since.isoformat(),
@@ -352,18 +361,31 @@ def main() -> int:
             if meeting:
                 params["nameOfMeeting"] = meeting
             print(f"[{target['label']}] {' '.join(keywords)} (from {since}, meeting={meeting or '*'})")
-            for record in fetch_speeches(params, args.retries, args.sleep):
+            key = tuple(sorted(params.items()))
+            if key not in cache:
+                if not first_request:
+                    time.sleep(args.sleep)
+                first_request = False
+                cache[key] = fetch_speeches(params, args.retries, args.sleep)
+            for record in cache[key]:
                 candidate = build_candidate(record, target, keywords, today)
                 if candidate is None:
                     continue
                 url = normalize_url(candidate["source_url"])
-                if url in skip_urls or url in seen:
+                if url in skip_urls:
                     continue
-                seen.add(url)
-                cid, needs_fix = assign_id(candidate, surnames, used_ids)
-                path = COMMENTS_DIR / candidate["article_ids"][0] / f"{cid}.yaml"
-                written.append((path, cid, candidate, needs_fix))
-                print(f"  + {path.relative_to(ROOT)}  {record['speaker']} {record['date']}")
+                current = candidates.get(url)
+                if current is not None and (current["draft_id"] or not candidate["draft_id"]):
+                    continue
+                candidates[url] = candidate
+
+    written: list[tuple[pathlib.Path, str, dict, bool]] = []
+    for candidate in candidates.values():
+        record = candidate["record"]
+        cid, needs_fix = assign_id(candidate, surnames, used_ids)
+        path = COMMENTS_DIR / candidate["article_ids"][0] / f"{cid}.yaml"
+        written.append((path, cid, candidate, needs_fix))
+        print(f"  + {path.relative_to(ROOT)}  {record['speaker']} {record['date']}  ({candidate['target_label']}, draft_id={candidate['draft_id']})")
 
     if not args.dry_run:
         for path, cid, candidate, _ in written:
@@ -389,15 +411,16 @@ def render_summary(written: list[tuple[pathlib.Path, str, dict, bool]], since: d
         "- `draft_id` は、発言本文に改憲案への言及語が含まれる場合のみ機械的に設定しています(docs/design.md 5.5 の7)",
         "- 不要な候補はファイルを削除し、再提案を防ぐ場合は `scripts/comment_collection_ignore.txt` に source_url を追記してください",
         "",
-        "| ファイル | 発言者 | 日付 | 会議 | 検索対象 | 備考 |",
-        "| --- | --- | --- | --- | --- | --- |",
+        "| ファイル | 発言者 | 日付 | 会議 | 検索対象 | draft_id | 備考 |",
+        "| --- | --- | --- | --- | --- | --- | --- |",
     ]
     for path, _cid, c, needs_fix in written:
         r = c["record"]
         note = "id の姓を要確認(既存データに同じ発言者がいないため、読み全体をローマ字化)" if needs_fix else ""
+        draft = f"`{c['draft_id']}`" if c["draft_id"] else "null(現行条文側)"
         lines.append(
             f"| `{path.relative_to(ROOT)}` | {r['speaker']}({r['speakerGroup']}) | {r['date']} | "
-            f"[{c['venue']}]({c['source_url']}) | {c['target_label']} | {note} |"
+            f"[{c['venue']}]({c['source_url']}) | {c['target_label']} | {draft} | {note} |"
         )
     return "\n".join(lines) + "\n"
 

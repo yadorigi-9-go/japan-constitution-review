@@ -314,14 +314,14 @@ GitHub Actions で次を自動化する。
 
 自動化するのは**候補の発見・整理まで**とし、出典との照合と公開可否の判断(`verified: true` への変更)は人が行う。
 
-- **収集対象**: 国会会議録検索API(一次資料)の発言のうち、`scripts/comment_collection_targets.json` に定義した改憲案の条文ごとの検索語に一致するもの。既定では憲法審査会の発言に限定する。参考人・公述人等(`speakerRole` あり)や会派の記録がない発言者(政府参考人等)は対象外。
+- **収集対象**: 国会会議録検索API(一次資料)の発言のうち、`scripts/comment_collection_targets.json` に定義した改憲案の条文ごとの検索語に一致するもの。既定では憲法審査会の発言に限定する。対象は jimin-2018 の全7条文と、jimin-2012 の変更条文(補則の削除である現行第100〜103条を除く。言及が見込みにくいため。Issue #166、2026-11-28)。一般的な語で検索する条文は、検索語に「草案」を加えてノイズを減らす。参考人・公述人等(`speakerRole` あり)や会派の記録がない発言者(政府参考人等)は対象外。
 - **頻度**: 毎週水曜 01:00 UTC(10:00 JST)。既定で直近30日の発言を対象にする(会議録の公開には会議から数日〜数週間かかるため、期間を重ねて取りこぼしを防ぐ)。手動実行(`workflow_dispatch`)では `since` / `days` を指定できる。
 - **保存形式**: 既存のスキーマどおり `data/comments/<article-id>/<id>.yaml` に書き出す。
   - `verified: false` 固定。`excerpt` はAPIの発言本文からの一言一句そのままの部分文字列(キーワードを含む最初の文。長い場合は読点で後ろを切る)。`summary` は空欄、`tags` は空。
   - `stance` / `claim_type` はスキーマ上必須のため仮値(`neutral` / `quote`)を入れ、YAMLコメントで「要確認」と明記する。
-  - `draft_id` は、発言本文に改憲案への言及語(`draft_mention_keywords`)が含まれる場合のみ設定し、含まれない場合は現行条文側(`fallback_article_ids`、`draft_id: null`)の候補にする(5.5節の7)。
+  - `draft_id` は、発言本文に改憲案への言及語(`draft_mention_keywords`)が含まれる場合のみ設定し、含まれない場合は現行条文側(`fallback_article_ids`、`draft_id: null`)の候補にする(5.5節の7)。新設条文などで、同じ番号の現行条文と内容が対応しない場合は `fallback_article_ids` を空にし、改憲案への言及がない発言は候補にしない(5.2節の `is_new`)。
   - `id` の姓は、既存データに同じ発言者がいればその表記を使う。いなければ `speakerYomi` 全体をローマ字化した仮のidにし、PR本文で姓のみへの修正を促す(読みから姓を推測で切り出さない。5.5節の3)。
-- **重複の処理**: 既存の `data/comments/` の `source_url`、未マージの候補PR(`auto/comment-candidates-*`)に含まれる `source_url`、`scripts/comment_collection_ignore.txt`(不採用にした候補のURL)と一致する発言は候補にしない。
+- **重複の処理**: 既存の `data/comments/` の `source_url`、未マージの候補PR(`auto/comment-candidates-*`)に含まれる `source_url`、`scripts/comment_collection_ignore.txt`(不採用にした候補のURL)と一致する発言は候補にしない。同じ発言が複数の検索対象に一致した場合は、`draft_id` に紐付く候補を現行条文側の候補より優先する(複数の改憲案が同じ検索語を使う条文で、改憲案への言及が失われないようにするため)。同じ検索条件のリクエストは1回の実行内で再利用する。
 - **通知**: 候補がある場合のみ、`auto/comment-candidates-<日時>` ブランチを作成してPRを開く(PR本文に候補一覧と確認事項を記載)。候補がない場合はブランチ・PR・通知を作らない。
 - **失敗時の挙動**: APIリクエストは再試行(既定2回)し、それでも失敗した場合や `npm run build` によるスキーマ検証に失敗した場合は、ジョブを失敗させPRを作らない(GitHubの通常のワークフロー失敗通知で気づける)。候補ブランチのpush後にPR作成が失敗した場合(リポジトリ設定でActionsによるPR作成が許可されていない等)は、候補ブランチを削除してからジョブを失敗させ、原因と確認すべき設定をジョブのサマリーに出力する(ブランチだけが残ると、次回の実行で同じ候補のブランチが重複して作られるため。Issue #164)。リクエスト間隔は既定4秒(8節の利用規約)。
 - **権限**: `GITHUB_TOKEN` に `contents: write`(候補ブランチのpush)と `pull-requests: write`(PR作成)のみ付与する。リポジトリ設定の「Allow GitHub Actions to create and approve pull requests」を有効にする必要がある。
