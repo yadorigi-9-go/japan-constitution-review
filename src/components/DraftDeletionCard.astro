@@ -1,0 +1,41 @@
+---
+import { getEntry, type CollectionEntry } from 'astro:content';
+import { articleLabel } from '../lib/draftDiff';
+
+// 改憲案で現行条文がまるごと削除される場合(del-<article-id>.yaml)のカード。
+// 現行条文の本文全体を取消線付きで表示する(docs/design.md 5.2)。
+interface Props {
+	entry: CollectionEntry<'draftDeletions'>;
+	draftLabel?: string;
+	href?: string;
+	headingLevel?: 'h1' | 'h2' | 'h3';
+}
+
+const { entry, draftLabel, href, headingLevel = 'h2' } = Astro.props;
+const Heading = headingLevel;
+const current = await getEntry('articles', entry.data.id);
+const paragraphs = current ? current.data.paragraphs : [];
+---
+
+<div class="overflow-hidden rounded-md border" style="border-color: var(--line);">
+	<div class="border-b px-4 py-3" style="border-color: var(--line); background: var(--paper-raised);">
+		{draftLabel && (
+			<p class="font-mono mb-1 text-xs" style="color: var(--ink-muted);">{draftLabel}</p>
+		)}
+		<Heading class="font-mincho text-lg" style="color: var(--ink);">
+			{href ? <a href={href} class="no-underline hover:underline">{entry.data.title}</a> : entry.data.title}
+		</Heading>
+		<p class="font-mono mt-1 flex items-center gap-2 text-sm" style="color: var(--ink-muted);">
+			{articleLabel(entry.data.id)}
+			<span class="tag">削除</span>
+		</p>
+	</div>
+	<div class="font-mono px-3 py-3 text-sm leading-relaxed">
+		{paragraphs.map((p) => (
+			<div class="flex gap-3 py-1">
+				<span class="shrink-0 text-right" style="width: 1.5rem; color: var(--ink-muted);">{p.no}</span>
+				<p style="color: var(--ink);"><del>{p.text}</del></p>
+			</div>
+		))}
+	</div>
+</div>
