@@ -1,68 +1,46 @@
 ---
-import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import DraftArticleDiffCard from '../../components/DraftArticleDiffCard.astro';
-import { computeDraftArticleDiff } from '../../lib/draftDiff';
+import DraftDeletionCard from '../../components/DraftDeletionCard.astro';
+import { articleLabel, computeDraftArticleDiff } from '../../lib/draftDiff';
+import { buildCompareGroups, CELL_KIND_LABEL } from '../../lib/draftCompare';
 
-// 同じ条文id(枝番含む)に、複数の改憲案が触れている場合に並べて比較する(Issue #137)。
-// 対象は現時点で存在する改憲案(jimin-2012, jimin-2018)のみ。他党の改憲案を追加する場合の
-// より一般的な比較ビューは #103 で別途検討する。
-const drafts = (await getCollection('drafts')).sort(
-	(a, b) => a.data.published_at.getTime() - b.data.published_at.getTime(),
-);
-const draftById = new Map(drafts.map((draft) => [draft.id, draft]));
-const draftArticles = await getCollection('draftArticles');
-
-const entriesByArticleId = new Map<string, (typeof draftArticles)[number][]>();
-for (const entry of draftArticles) {
-	const list = entriesByArticleId.get(entry.data.id) ?? [];
-	list.push(entry);
-	entriesByArticleId.set(entry.data.id, list);
-}
-
-const sharedArticleIds = [...entriesByArticleId.keys()]
-	.filter((id) => (entriesByArticleId.get(id)?.length ?? 0) >= 2)
-	.sort((a, b) => {
-		const pa = a.match(/^art-(\d+)(?:-(\d+))?$/);
-		const pb = b.match(/^art-(\d+)(?:-(\d+))?$/);
-		if (!pa || !pb) return a.localeCompare(b);
-		const na = Number(pa[1]) * 1000 + Number(pa[2] ?? 0);
-		const nb = Number(pb[1]) * 1000 + Number(pb[2] ?? 0);
-		return na - nb;
-	});
-
-const comparisons = await Promise.all(
-	sharedArticleIds.map(async (articleId) => {
-		const entries = entriesByArticleId.get(articleId)!;
-		const columns = await Promise.all(
-			entries
-				.sort((a, b) => {
-					const [draftA] = a.id.split('/');
-					const [draftB] = b.id.split('/');
-					return (draftById.get(draftA)?.data.published_at.getTime() ?? 0) -
-						(draftById.get(draftB)?.data.published_at.getTime() ?? 0);
-				})
-				.map(async (entry) => {
-					const [draftId] = entry.id.split('/');
-					const draft = draftById.get(draftId)!;
-					return {
-						draftId,
-						row: await computeDraftArticleDiff(entry),
-						draftLabel: draft.data.name,
-						href: `${import.meta.env.BASE_URL}drafts/${draftId}/${entry.data.id}`,
-					};
-				}),
-		);
-		return { articleId, columns };
-	}),
-);
-
+// 改憲案同士の比較ビュー。#137 で jimin-2012 / jimin-2018 の2案を並べる形で導入し、
+// #103 で任意の数の改憲案(他党の案の追加を想定)に一般化した。
+// - 上段: 条文 × 改憲案のマトリクス(どの案がどの条文に触れているかの一覧)
+// - 下段: 2案以上が触れている条文について、各案の現行条文との差分を並べて表示
+// 比較する案はチェックボックスで絞り込める(?drafts=a,b で共有可能)。JavaScript が
+// 無効な環境では、全案を対象にした状態で表示される。
 const base = import.meta.env.BASE_URL;
+const { drafts, groups } = await buildCompareGroups(base);
+const draftById = new Map(drafts.map((draft) => [draft.id, draft]));
+
+const detailGroups = await Promise.all(
+	groups
+		.filter((group) => group.cells.size >= 2)
+		.map(async (group) => ({
+			group,
+			columns: await Promise.all(
+				drafts
+					.filter((draft) => group.cells.has(draft.id))
+					.map(async (draft) => ({
+						draft,
+						cards: await Promise.all(
+							group.cells.get(draft.id)!.map(async (cell) =>
+								cell.kind === 'deleted'
+									? { cell, deletion: cell.entry, row: null }
+									: { cell, deletion: null, row: await computeDraftArticleDiff(cell.entry) },
+							),
+						),
+					})),
+			),
+		})),
+);
 ---
 
 <BaseLayout
 	title="改憲案の比較 | 日本国憲法レビュー"
-	description="同じ条文に複数の改憲案が触れている場合に、現行条文との差分を並べて比較します。"
+	description="複数の改憲案が、どの条文をどう変えるかを一覧・並列で比較します。"
 	breadcrumb={[{ name: '条文', href: base }, { name: '改憲案', href: `${base}drafts` }, { name: '比較' }]}
 	pagefindFilters={{ 種類: '改憲案比較' }}
 >
@@ -70,31 +48,159 @@ const base = import.meta.env.BASE_URL;
 		<a href={`${base}drafts`}>&larr; 改憲案一覧</a>
 	</p>
 	<h1 class="font-mincho mb-2 text-xl" style="color: var(--ink);">改憲案の比較</h1>
-	<p class="font-mono mb-6 text-sm" style="color: var(--ink-muted);">
-		同じ条文(枝番含む)に複数の改憲案が触れている場合に、各案の現行条文との差分を並べて表示します。
-		対象は現時点の{drafts.length}案({drafts.map((d) => d.data.name).join('、')})のみです。
+	<p class="font-mono mb-2 text-sm" style="color: var(--ink-muted);">
+		各改憲案が、どの現行条文を変更・改番・削除し、どの条文を新設するかを一覧にし、2案以上が触れている条文は差分を並べて表示します。
+		現時点の対象は{drafts.length}案({drafts.map((d) => d.data.name).join('、')})です。
+	</p>
+	<p class="font-mono mb-6 text-xs" style="color: var(--ink-muted);">
+		既存条文の変更は、改番の有無にかかわらず「どの現行条文に対する変更か」で揃えています。新設条文は草案側の条番号で揃えているため、番号が同じでも案によって内容が全く異なる場合があります(例: 第9条の2)。
 	</p>
 
-	{comparisons.length === 0 ? (
+	<fieldset class="font-mono mb-6 rounded-md border px-4 py-3 text-sm" style="border-color: var(--line);" data-compare-controls>
+		<legend class="px-1 text-xs" style="color: var(--ink-muted);">比較する改憲案</legend>
+		<div class="flex flex-wrap gap-x-6 gap-y-2">
+			{drafts.map((draft) => (
+				<label class="inline-flex items-center gap-2">
+					<input type="checkbox" name="draft" value={draft.id} checked data-draft-toggle />
+					<span>{draft.data.name}</span>
+					{draft.data.status === 'outline' && <span class="tag">たたき台(未完成)</span>}
+				</label>
+			))}
+		</div>
+		<label class="mt-3 inline-flex items-center gap-2 text-xs" style="color: var(--ink-muted);">
+			<input type="checkbox" data-shared-only />
+			<span>一覧は、選択した案のうち2案以上が触れている条文のみ表示する</span>
+		</label>
+	</fieldset>
+
+	<h2 class="font-mincho mb-3 text-lg" style="color: var(--ink);">条文ごとの一覧</h2>
+	<div class="mb-10 overflow-x-auto rounded-md border" style="border-color: var(--line);">
+		<table class="font-mono w-full text-sm" data-compare-matrix>
+			<thead style="background: var(--paper-raised);">
+				<tr>
+					<th scope="col" class="px-3 py-2 text-left font-normal" style="color: var(--ink-muted);">条文(現行)</th>
+					{drafts.map((draft) => (
+						<th scope="col" class="px-3 py-2 text-left font-normal" style="color: var(--ink-muted);" data-draft={draft.id}>
+							<a href={`${base}drafts/${draft.id}`}>{draft.data.name}</a>
+						</th>
+					))}
+				</tr>
+			</thead>
+			<tbody>
+				{groups.map((group) => (
+					<tr class="border-t" style="border-color: var(--line);" data-row data-drafts={[...group.cells.keys()].join(' ')}>
+						<th scope="row" class="whitespace-nowrap px-3 py-2 text-left font-normal align-top">
+							{group.cells.size >= 2 ? <a href={`#${group.anchor}`}>{group.label}</a> : group.label}
+							{group.isNewGroup && <span class="tag tag-new ml-1">新設</span>}
+						</th>
+						{drafts.map((draft) => {
+							const cells = group.cells.get(draft.id) ?? [];
+							return (
+								<td class="px-3 py-2 align-top" data-draft={draft.id}>
+									{cells.length === 0 ? (
+										<span style="color: var(--ink-muted);" aria-label="変更なし">—</span>
+									) : (
+										cells.map((cell) => (
+											<div>
+												<span class={cell.kind === 'new' ? 'tag tag-new' : 'tag'}>{CELL_KIND_LABEL[cell.kind]}</span>{' '}
+												<a href={cell.href}>
+													{cell.kind === 'renamed' && `→ ${articleLabel(cell.draftArticleId)} `}
+													{cell.title}
+												</a>
+											</div>
+										))
+									)}
+								</td>
+							);
+						})}
+					</tr>
+				))}
+			</tbody>
+		</table>
+	</div>
+
+	<h2 class="font-mincho mb-3 text-lg" style="color: var(--ink);">2案以上が触れている条文の差分</h2>
+	{detailGroups.length === 0 ? (
 		<p class="font-mono text-sm" style="color: var(--ink-muted);">
 			現時点では、同じ条文に複数の改憲案が触れているケースはありません。
 		</p>
 	) : (
 		<div class="flex flex-col gap-8">
-			{comparisons.map(({ articleId, columns }) => (
-				<section>
-					<div class="grid gap-4" style={`grid-template-columns: repeat(${columns.length}, minmax(0, 1fr));`}>
-						{columns.map((column) => (
-							<DraftArticleDiffCard
-								row={column.row}
-								draftLabel={column.draftLabel}
-								href={column.href}
-								headingLevel="h2"
-							/>
+			{detailGroups.map(({ group, columns }) => (
+				<section id={group.anchor} data-row data-detail data-drafts={columns.map((c) => c.draft.id).join(' ')}>
+					<h3 class="font-mincho mb-2 text-base" style="color: var(--ink);">
+						{group.label}
+						{group.isNewGroup && <span class="tag tag-new ml-2">新設</span>}
+					</h3>
+					<div class="compare-columns grid gap-4 overflow-x-auto">
+						{columns.map(({ draft, cards }) => (
+							<div class="flex flex-col gap-4" data-draft={draft.id}>
+								{cards.map(({ cell, deletion, row }) =>
+									deletion ? (
+										<DraftDeletionCard entry={deletion} draftLabel={draft.data.name} href={cell.href} headingLevel="h3" />
+									) : (
+										<DraftArticleDiffCard row={row!} draftLabel={draft.data.name} href={cell.href} headingLevel="h3" />
+									),
+								)}
+							</div>
 						))}
 					</div>
 				</section>
 			))}
 		</div>
 	)}
+	<p class="font-mono mt-6 text-sm" style="color: var(--ink-muted);" data-detail-empty hidden>
+		選択した改憲案の中で、同じ条文に2案以上が触れているケースはありません。
+	</p>
 </BaseLayout>
+
+<style>
+	.compare-columns {
+		grid-auto-flow: column;
+		grid-auto-columns: minmax(16rem, 1fr);
+	}
+</style>
+
+<script>
+	// 比較する改憲案の絞り込み。選択状態は ?drafts=a,b としてURLに反映し、共有できるようにする。
+	const toggles = [...document.querySelectorAll<HTMLInputElement>('[data-draft-toggle]')];
+	const sharedOnly = document.querySelector<HTMLInputElement>('[data-shared-only]');
+	const detailEmpty = document.querySelector<HTMLElement>('[data-detail-empty]');
+
+	const params = new URLSearchParams(location.search);
+	const requested = params.get('drafts')?.split(',').filter(Boolean);
+	if (requested && requested.length > 0) {
+		for (const toggle of toggles) toggle.checked = requested.includes(toggle.value);
+	}
+	if (params.get('shared') === '1' && sharedOnly) sharedOnly.checked = true;
+
+	function apply() {
+		const selected = new Set(toggles.filter((t) => t.checked).map((t) => t.value));
+		for (const el of document.querySelectorAll<HTMLElement>('[data-draft]')) {
+			el.hidden = !selected.has(el.dataset.draft!);
+		}
+		let visibleDetails = 0;
+		for (const row of document.querySelectorAll<HTMLElement>('[data-row]')) {
+			const count = (row.dataset.drafts ?? '').split(' ').filter((id) => selected.has(id)).length;
+			const isDetail = row.hasAttribute('data-detail');
+			const minimum = isDetail || sharedOnly?.checked ? 2 : 1;
+			row.hidden = count < minimum;
+			if (isDetail && !row.hidden) visibleDetails += 1;
+		}
+		if (detailEmpty) {
+			const hasAnyDetail = document.querySelector('[data-detail]') !== null;
+			detailEmpty.hidden = !hasAnyDetail || visibleDetails > 0;
+		}
+
+		const url = new URL(location.href);
+		if (selected.size === toggles.length) url.searchParams.delete('drafts');
+		else url.searchParams.set('drafts', [...selected].join(','));
+		if (sharedOnly?.checked) url.searchParams.set('shared', '1');
+		else url.searchParams.delete('shared');
+		history.replaceState(null, '', url);
+	}
+
+	for (const toggle of toggles) toggle.addEventListener('change', apply);
+	sharedOnly?.addEventListener('change', apply);
+	apply();
+</script>
