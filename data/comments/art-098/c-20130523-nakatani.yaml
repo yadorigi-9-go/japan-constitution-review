@@ -1,0 +1,21 @@
+id: c-20130523-nakatani
+article_ids: [art-098, art-099]
+draft_id: jimin-2012
+kind: speech
+claim_type: interpretation
+stance: support
+source_type: primary
+speaker:
+  name: "中谷元"
+  role: "衆議院議員"
+  party: "自由民主党"
+date: 2013-05-23
+venue: "衆議院憲法審査会"
+excerpt: "このため、自民党の草案では、東日本大震災における政府の対応への反省も踏まえて、緊急事態に対処するための仕組みを独立の章として憲法上明確に規定しました。"
+summary: "自由民主党の中谷元衆議院議員(憲法審査会)が、党を代表して、自民党の草案は東日本大震災での政府の対応への反省も踏まえ、緊急事態に対処する仕組みを独立の章として規定したと説明した。内容として、内閣総理大臣が閣議にかけて緊急事態の宣言を行うこと、宣言には事前又は事後の国会承認を要すること、百日を超えて継続する場合は事前の国会承認を要すること、宣言の効果は憲法に規定された事項に限定されるべきことなどを述べた。"
+summary_source: ai
+source_url: "https://kokkai.ndl.go.jp/txt/118304183X01020130523/5"
+archive_url: ""
+accessed_at: 2026-11-28
+tags: ["緊急事態条項", "緊急事態の宣言"]
+verified: true
