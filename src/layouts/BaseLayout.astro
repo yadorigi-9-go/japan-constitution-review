@@ -19,11 +19,17 @@ interface Props {
 	// 検索(Pagefind)のフィルタとして使うキーと値(例: {種類: '条文'})。
 	// data-pagefind-filter としてページに埋め込み、検索結果の絞り込みに使う(Issue #124)。
 	pagefindFilters?: Record<string, string>;
+	// ページ固有の構造化データ(schema.org、JSON-LD)。BreadcrumbList とは別の script として
+	// 出力する(例: 条文ページの Legislation。docs/design.md 9節、Issue #170)。
+	structuredData?: Record<string, unknown>;
 }
 
 const defaultDescription =
 	'日本国憲法と改憲案の論点・リスクを、コードレビュー形式で検証する非公式サイト。';
-const { title, description = defaultDescription, ogImage, breadcrumb, pagefindFilters } = Astro.props;
+const { title, description = defaultDescription, ogImage, breadcrumb, pagefindFilters, structuredData } = Astro.props;
+// JSON-LD を <script> に埋め込むとき、本文中の "<" で </script> が誤って閉じられないよう
+// < にエスケープする(JSON としての値は変わらない)。
+const toJsonLd = (data: unknown) => JSON.stringify(data).replace(/</g, '\\u003c');
 const base = import.meta.env.BASE_URL;
 const path = Astro.url.pathname;
 const canonicalURL = new URL(path, Astro.site);
@@ -72,7 +78,8 @@ const tabs = [
 		<meta name="twitter:title" content={title} />
 		<meta name="twitter:description" content={description} />
 		<meta name="twitter:image" content={ogImageURL} />
-		{breadcrumbJsonLd && <script type="application/ld+json" set:html={JSON.stringify(breadcrumbJsonLd)} />}
+		{breadcrumbJsonLd && <script type="application/ld+json" set:html={toJsonLd(breadcrumbJsonLd)} />}
+		{structuredData && <script type="application/ld+json" set:html={toJsonLd(structuredData)} />}
 		<slot name="head" />
 		<script is:inline>
 			// ちらつき防止のため、スタイル適用前に同期的にテーマを決定する。

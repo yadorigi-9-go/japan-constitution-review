@@ -287,7 +287,7 @@ GitHub のUIを参考にする。配色・部品だけでなく、ヘッダー�
 
 - 条文・改憲案ごとの固有URL(静的生成) — 実装済み
 - `title` / `description` / OGP、`sitemap.xml`、canonical — 実装済み(`src/layouts/BaseLayout.astro`、`@astrojs/sitemap`)。OGP画像は条文・改憲案ごとにビルド時自動生成する(`src/pages/og/`、satori + resvg。Noto Sans JPはGoogle Fontsの分割配信だと必要な字の範囲が特定できないため、分割されていないNoto Sans CJK JPを直接取得して使用。2026-11-02)
-- 構造化データ(法令の条文として扱える形式を検討) — 未着手
+- 構造化データ(法令の条文として扱える形式を検討) — 実装済み。現行の条文・前文ページに schema.org の `Legislation`(JSON-LD)を付け、`isPartOf` で親の「日本国憲法」(公布日・施行日、`legislationLegalForce: InForce`)につなぐ。本文・出典(`isBasedOn`)・取得日(`legislationDateVersion`)は `data/articles/` の値をそのまま使い、法令番号などデータにない値は入れない。改憲案は成立した法令ではないため `Legislation` を付けない(現行法令と誤認させない)。`LegislationObject` はファイル(PDF 等)を表す型のため使わない(`src/lib/structuredData.ts`、Issue #170、2026-11-28)
 - 純粋なSPAにしない(HTML をビルド時に生成する) — 実装済み(Astro の静的生成)
 - 独自ドメインを取得する場合は、ユーザー名が URL に出ないようにできる — 独自ドメイン自体は13の未決事項
 
