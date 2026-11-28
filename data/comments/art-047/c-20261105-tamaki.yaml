@@ -1,0 +1,25 @@
+# 自動収集した候補(scripts/collect_comment_candidates.py)。出典と照合し、
+# stance / claim_type / summary / tags / id を確認・修正してから verified: true にする。
+id: c-20261105-tamaki
+article_ids: [art-047]
+draft_id: null
+kind: speech
+# 要確認: claim_type は自動収集の仮値
+claim_type: quote
+# 要確認: stance は自動収集の仮値(発言者本人の立場表明に基づいて設定する)
+stance: neutral
+source_type: primary
+speaker:
+  name: "玉木雄一郎"
+  role: "衆議院議員"
+  party: "国民民主党・無所属クラブ"
+date: 2026-11-05
+venue: "衆議院憲法審査会"
+excerpt: "二〇二四年六月に五会派で合意した大規模災害時等における議員任期の延長など国会機能の維持に関する改正と、昨日の参議院憲法審査会でも議論された合区の解消であります。"
+summary: ""
+summary_source: human
+source_url: "https://kokkai.ndl.go.jp/txt/122204183X00320261105/8"
+archive_url: ""
+accessed_at: 2026-11-28
+tags: []
+verified: false
