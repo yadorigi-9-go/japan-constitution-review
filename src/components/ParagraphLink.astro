@@ -1,0 +1,18 @@
+---
+// 項(段落)番号のガターを、その項へのパーマリンクにする(GitHub の行番号リンク #L3 に相当。
+// Issue #168)。行(.para-row)側に id を付け、:target でハイライトする(global.css)。
+interface Props {
+	/** アンカー名(例: "p1", "del-p2")。行の id と一致させる */
+	anchor: string;
+	/** 表示する文字(項番号。前文は公式の段落番号がないため "¶") */
+	label: string | number;
+	/** スクリーンリーダー向けの説明(例: "第1項へのリンク") */
+	ariaLabel: string;
+	/** 別ページの項へリンクする場合のページURL(比較ビューなど)。省略時は同じページ内 */
+	pageHref?: string;
+}
+
+const { anchor, label, ariaLabel, pageHref } = Astro.props;
+---
+
+<a class="para-link" href={`${pageHref ?? ''}#${anchor}`} aria-label={ariaLabel} title={ariaLabel}>{label}</a>
