@@ -1,0 +1,2 @@
+# scripts/collect_comment_candidates.py が候補から除外する source_url の一覧(1行1URL、# 以降はコメント)。
+# レビューで不採用とし、候補ファイルを削除したものの再提案を防ぐために使う。
