@@ -1,0 +1,21 @@
+id: c-20260625-inada
+article_ids: [art-047]
+draft_id: jimin-2018
+kind: speech
+claim_type: interpretation
+stance: support
+source_type: primary
+speaker:
+  name: "稲田朋美"
+  role: "衆議院議員"
+  party: "自由民主党・無所属の会"
+date: 2026-06-25
+venue: "衆議院憲法審査会"
+excerpt: "特に、参議院の選挙においては、都道府県を選挙区とする場合、改選ごとに各選挙区において少なくとも一人を選挙すべきものとすることができると規定し、合区を解消できるよう憲法上担保しております。"
+summary: "自由民主党の稲田朋美衆議院議員が、合区により対象県で有権者と議員の距離が遠くなる、投票率の低下が指摘されているなどの問題を挙げた。そのうえで、47条に人口を基本としつつ行政区画・地域的な一体性・地勢等を総合的に勘案する旨を明記し、参議院選挙で都道府県ごとに改選ごと少なくとも1人を選挙できるとする自民党の改正案を説明した。"
+summary_source: ai
+source_url: "https://kokkai.ndl.go.jp/txt/122104183X01120260625/25"
+archive_url: ""
+accessed_at: 2026-11-28
+tags: ["選挙区", "合区", "一票の格差", "自民党たたき台素案"]
+verified: true
