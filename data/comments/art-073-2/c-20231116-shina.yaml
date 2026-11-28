@@ -1,0 +1,21 @@
+id: c-20231116-shina
+article_ids: [art-073-2]
+draft_id: jimin-2018
+kind: speech
+claim_type: concern
+stance: oppose
+source_type: primary
+speaker:
+  name: "階猛"
+  role: "衆議院議員"
+  party: "立憲民主党・無所属"
+date: 2023-11-16
+venue: "衆議院憲法審査会"
+excerpt: "我が党は、行政府に権力が集中することで国民の自由と民主政治を著しく損なう危険があるため、政府は、緊急政令、すなわち国会に代わって法律の効力を有する命令を発する必要はないという立場です。"
+summary: "立憲民主党の階猛衆議院議員が、自民党の条文イメージでは議員任期延長と緊急政令の条項がセットになっていると指摘した。緊急事態下でも国会機能を維持できるのであれば必要な法律は制定できるとして、憲法41条の例外となる緊急政令の規定は必要ないのではないかと自民党側に質問した。"
+summary_source: ai
+source_url: "https://kokkai.ndl.go.jp/txt/121204183X00320231116/19"
+archive_url: ""
+accessed_at: 2026-11-28
+tags: ["緊急政令", "緊急事態", "権限集中", "自民党2018年条文イメージ"]
+verified: false
