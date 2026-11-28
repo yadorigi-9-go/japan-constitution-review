@@ -1,0 +1,21 @@
+id: c-20220323-ozawa
+article_ids: [art-053]
+draft_id: jimin-2012
+kind: speech
+claim_type: interpretation
+stance: neutral
+source_type: primary
+speaker:
+  name: "小沢雅仁"
+  role: "参議院議員"
+  party: "立憲民主・社民"
+date: 2022-03-23
+venue: "参議院憲法審査会"
+excerpt: "昨年七月、私たち野党は、憲法五十三条に基づき臨時国会の召集要求をしましたが、自民党の改憲草案で、要求があった日から二十日以内に臨時国会が召集されなければならないとしながら、およそ八十日間もたなざらしにされました。"
+summary: "立憲民主・社民の小沢雅仁参議院議員(憲法審査会)が、野党による第53条に基づく臨時国会の召集要求が、自民党の改憲草案では要求から20日以内の召集を定めているにもかかわらず約80日間応じられなかったと指摘した。2017年の例と広島高裁岡山支部の判示にも触れ、現行憲法を尊重しながら実施状況についても議論すべきだと述べた。"
+summary_source: ai
+source_url: "https://kokkai.ndl.go.jp/txt/120814183X00120220323/28"
+archive_url: ""
+accessed_at: 2026-11-28
+tags: ["臨時国会", "召集期限"]
+verified: false

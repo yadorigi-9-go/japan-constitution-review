@@ -1,0 +1,21 @@
+id: c-20220210-ishiba
+article_ids: [art-053]
+draft_id: jimin-2012
+kind: speech
+claim_type: interpretation
+stance: support
+source_type: primary
+speaker:
+  name: "石破茂"
+  role: "衆議院議員"
+  party: "自由民主党"
+date: 2022-02-10
+venue: "衆議院憲法審査会"
+excerpt: "自民党の憲法改正草案は、衆参いずれかの総議員の四分の一以上の要求があれば、二十日以内に召集、もちろん召集は陛下の権能であらせられるのだが、しなければならないというふうに書いてある。これに反対する党があるんだろうか。"
+summary: "自由民主党の石破茂衆議院議員(憲法審査会)が、平成24年の自民党の憲法改正草案のうち、多くの党の賛成が得られると考えるものの一つとして、臨時国会の召集要求から20日以内の召集を義務づける規定を挙げた。少数意見を尊重するという考え方がその背景にあったとの考えを述べた。"
+summary_source: ai
+source_url: "https://kokkai.ndl.go.jp/txt/120804183X00120220210/30"
+archive_url: ""
+accessed_at: 2026-11-28
+tags: ["臨時国会", "召集期限"]
+verified: false
