@@ -95,8 +95,36 @@ jobs:
           git add data/comments
           git commit -m "国会会議録から実発言コメントの候補を自動収集(verified: false)"
           git push origin "$branch"
-          gh pr create \
-            --base main \
-            --head "$branch" \
-            --title "[auto] 実発言コメント候補の自動収集 ($(date -u +%Y-%m-%d))" \
-            --body-file "$RUNNER_TEMP/summary.md"
+          # PR作成に失敗した場合は、push した候補ブランチを削除してからジョブを失敗させる。
+          # 重複除外は開いている候補PRしか見ないため、ブランチだけが残ると次回の実行で
+          # 同じ候補のブランチがもう1本作られてしまう (Issue #164)。
+          if ! pr_url=$(gh pr create \
+              --base main \
+              --head "$branch" \
+              --title "[auto] 実発言コメント候補の自動収集 ($(date -u +%Y-%m-%d))" \
+              --body-file "$RUNNER_TEMP/summary.md" 2> "$RUNNER_TEMP/pr-error.txt"); then
+            cat "$RUNNER_TEMP/pr-error.txt" >&2
+            if git push origin --delete "$branch"; then
+              cleanup="候補ブランチ \`$branch\` は削除しました。"
+            else
+              cleanup="候補ブランチ \`$branch\` の削除にも失敗しました。手動で削除してください。"
+              echo "::warning::候補ブランチ $branch を削除できませんでした"
+            fi
+            {
+              echo "## PRの作成に失敗しました"
+              echo
+              echo '```'
+              cat "$RUNNER_TEMP/pr-error.txt"
+              echo '```'
+              echo
+              echo "$cleanup"
+              echo
+              echo "\`GitHub Actions is not permitted to create or approve pull requests\` の場合は、"
+              echo "リポジトリ設定 Settings → Actions → General → Workflow permissions の"
+              echo "「Allow GitHub Actions to create and approve pull requests」を有効にして保存してから再実行してください。"
+            } >> "$GITHUB_STEP_SUMMARY"
+            echo "::error::PRの作成に失敗しました。詳細はジョブのサマリーを参照してください。"
+            exit 1
+          fi
+          echo "Created $pr_url"
+          echo "候補のPRを作成しました: $pr_url" >> "$GITHUB_STEP_SUMMARY"
