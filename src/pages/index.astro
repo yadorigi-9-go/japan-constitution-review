@@ -2,6 +2,7 @@
 import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import BranchSelector from '../components/BranchSelector.astro';
+import { getCurrentArticleCommentCounts } from '../lib/draftComments';
 
 // 前文を先頭に、条文は条文番号(数値)の昇順で並べる。
 const articles = (await getCollection('articles')).sort((a, b) => {
@@ -14,14 +15,9 @@ const articles = (await getCollection('articles')).sort((a, b) => {
   return 0;
 });
 
-// verified: false のコメントは件数に数えない (docs/design.md 10)
-const verifiedComments = (await getCollection('comments')).filter((comment) => comment.data.verified);
-const commentCountByArticleId = new Map<string, number>();
-for (const comment of verifiedComments) {
-  for (const articleId of comment.data.article_ids) {
-    commentCountByArticleId.set(articleId, (commentCountByArticleId.get(articleId) ?? 0) + 1);
-  }
-}
+// verified: false のコメントは件数に数えない (docs/design.md 10)。件数は各条文ページに
+// 表示されるコメント数と同じ判定で数える(src/lib/draftComments.ts、Issue #229)。
+const commentCountByArticleId = await getCurrentArticleCommentCounts();
 
 // 章ごとにグループ化する(前文は独立した行として扱う)。
 type Row = { chapter: string | null; items: typeof articles };
